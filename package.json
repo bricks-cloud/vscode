@@ -19,7 +19,25 @@
         "command": "d2c-vscode.helloWorld",
         "title": "Hello World"
       }
-    ]
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "bricks-d2c",
+          "title": "Bricks Design To Code",
+          "icon": "src/asset/bricks-logo.png"
+        }
+      ]
+    },
+    "views": {
+      "bricks-d2c": [
+        {
+          "id": "bricks-work-space",
+          "name": "Work Space",
+          "type": "tree"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "yarn run package",
