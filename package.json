@@ -1,5 +1,6 @@
 {
   "name": "d2c-vscode",
+  "publisher": "bricks",
   "displayName": "d2c-vscode",
   "description": "Design to code tool",
   "version": "0.0.1",
@@ -10,7 +11,8 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:bricksDesignToCode.openFile"
+    "onCommand:bricksDesignToCode.openFile",
+    "onCommand:bricksDesignToCode.handleUri"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -24,17 +26,21 @@
       ]
     },
     "views": {
-			"explorer": [
-				{
-					"id": "bricksWorkspace",
-					"name": "Bricks Workspace"
-				}
-			]
+      "explorer": [
+        {
+          "id": "bricksWorkspace",
+          "name": "Bricks Workspace"
+        }
+      ]
     },
     "commands": [
       {
         "command": "bricksDesignToCode.openFile",
         "title": "Open File"
+      },
+      {
+        "command": "bricksDesignToCode.handleUri",
+        "title": "Start handling Uris"
       }
     ]
   },
@@ -68,7 +74,7 @@
     "webpack-cli": "^5.0.0"
   },
   "dependencies": {
-		"mkdirp": "^0.5.1",
-		"rimraf": "^2.6.2"
+    "mkdirp": "^0.5.1",
+    "rimraf": "^2.6.2"
   }
 }
