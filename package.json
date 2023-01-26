@@ -1,5 +1,6 @@
 {
   "name": "d2c-vscode",
+  "publisher": "bricks",
   "displayName": "d2c-vscode",
   "description": "Design to code tool",
   "version": "0.0.1",
@@ -11,7 +12,8 @@
   ],
   "activationEvents": [
     "onCommand:bricksDesignToCode.openFile",
-    "onCommand:bricksDesignToCode.openWebview"
+    "onCommand:bricksDesignToCode.openWebview",
+    "onCommand:bricksDesignToCode.handleUri"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -41,6 +43,10 @@
         "command": "bricksDesignToCode.openWebview",
         "title": "Open Webview",
         "category": "Bricks"
+      },
+      {
+        "command": "bricksDesignToCode.handleUri",
+        "title": "Start handling Uris"
       }
     ]
   },
