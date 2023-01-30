@@ -1,10 +1,10 @@
 import * as vscode from "vscode";
 import { FileExplorer } from "./fileExplorer";
-import { UriHandler } from "./UriHandler";
+import { Server } from "socket.io";
 
 import { GeneratedCodePreviewPanel } from "./generatedCodePreviewPanel";
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand("bricksDesignToCode.openWebview", () => {
       GeneratedCodePreviewPanel.createOrShow(context.extensionUri);
@@ -31,27 +31,22 @@ export function activate(context: vscode.ExtensionContext) {
     );
   }
 
-  // Uri handling
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      "bricksDesignToCode.handleUri",
-      async () => {
-        context.subscriptions.push(
-          vscode.window.registerUriHandler(new UriHandler())
-        );
-
-        const uri = await vscode.env.asExternalUri(
-          vscode.Uri.parse(`${vscode.env.uriScheme}://bricks.d2c-vscode`)
-        );
-
-        console.log(
-          `Starting to handle Uris. Open ${uri} in your browser to test.`
-        );
-      }
-    )
-  );
-
   new FileExplorer(context);
+
+  // socket server
+  const io = new Server(3000, {
+    cors: {
+      origin: "*",
+    },
+  });
+
+  io.on("connection", (socket) => {
+    socket.emit("pong", "pong");
+
+    socket.on("selection-change", (arg) => {
+      console.log(arg);
+    });
+  });
 }
 
 function getWebviewOptions(extensionUri: vscode.Uri): vscode.WebviewOptions {
