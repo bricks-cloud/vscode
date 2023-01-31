@@ -57,6 +57,7 @@
     "watch": "webpack --watch",
     "package": "webpack --mode production --devtool hidden-source-map",
     "compile:extension": "tsc -p . --outDir out",
+    "watch:extension": "tsc --watch -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "yarn run compile-tests && yarn run compile && yarn run lint",
     "lint": "eslint src --ext ts"
@@ -66,6 +67,7 @@
     "@types/mkdirp": "^0.5.2",
     "@types/mocha": "^10.0.1",
     "@types/node": "16.x",
+    "@types/prettier": "^2.7.2",
     "@types/react-dom": "^18.0.10",
     "@types/rimraf": "^2.0.2",
     "@types/vscode": "^1.74.0",
@@ -85,6 +87,7 @@
     "mkdirp": "^0.5.1",
     "postcss-loader": "^7.0.2",
     "postcss-preset-env": "^8.0.0",
+    "prettier": "^2.8.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "rimraf": "^2.6.2",

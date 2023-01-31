@@ -15,4 +15,5 @@ const App = () => (
   </div>
 );
 
+// TODO: Replace ReactDOM.render because it is deprecated
 ReactDOM.render(<App />, document.getElementById('root'));

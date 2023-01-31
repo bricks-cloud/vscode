@@ -1,8 +1,35 @@
 import * as vscode from "vscode";
-import { FileExplorer } from "./fileExplorer";
+import { FileSystemProvider } from "./fileExplorer";
 import { Server } from "socket.io";
+import prettier from "prettier";
 
 import { GeneratedCodePreviewPanel } from "./generatedCodePreviewPanel";
+
+export class FileExplorer {
+  private readonly bricksFileSystem: FileSystemProvider;
+
+  constructor(context: vscode.ExtensionContext, bricksFileSystem: FileSystemProvider) {
+    this.bricksFileSystem = bricksFileSystem;
+
+    if (!context.storageUri) {
+      vscode.window.showInformationMessage('Open a workspace to start using Bricks Design to Code Tool');
+      return;
+    }
+
+    this.bricksFileSystem.createDirectory(vscode.Uri.parse(context.storageUri.toString() + '/bricks-workspace'));
+    this.bricksFileSystem.writeFile(vscode.Uri.parse(context.storageUri.toString() + '/bricks-workspace/GeneratedCode.js'), Buffer.from('/* Select components using the Figma Plugin */'), { create: true, overwrite: true });
+    context.subscriptions.push(vscode.window.createTreeView('bricksWorkspace', { treeDataProvider: this.bricksFileSystem }));
+    vscode.commands.registerCommand('bricksDesignToCode.openFile', (resource) => this.openResource(resource));
+  }
+
+  private openResource(resource: vscode.Uri): void {
+    vscode.window.showTextDocument(resource);
+  }
+}
+
+export async function deactivate() {
+
+};
 
 export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
@@ -31,8 +58,6 @@ export async function activate(context: vscode.ExtensionContext) {
     );
   }
 
-  new FileExplorer(context);
-
   // socket server
   const io = new Server(3000, {
     cors: {
@@ -40,14 +65,33 @@ export async function activate(context: vscode.ExtensionContext) {
     },
   });
 
-  io.on("connection", (socket) => {
-    socket.emit("pong", "pong");
 
-    socket.on("selection-change", (arg) => {
-      console.log(arg);
+  const { storageUri } = context;
+
+  if (storageUri) {
+    const treeDataProvider = new FileSystemProvider(storageUri);
+    new FileExplorer(context, treeDataProvider);
+
+    io.on("connection", (socket) => {
+      socket.emit("pong", "pong");
+
+      socket.on("selection-change", (arg) => {
+        console.log(arg);
+      });
+
+      socket.on("code-generation", (data) => {
+        const uri = vscode.Uri.parse(storageUri.toString() + '/bricks-workspace/GeneratedCode.js');
+        const formatedCode = prettier.format(insertIntoTemplate(data), { semi: true, parser: "babel" });
+        treeDataProvider.writeFile(uri, Buffer.from(formatedCode), { create: true, overwrite: true });
+      });
     });
-  });
+  }
 }
+
+
+const insertIntoTemplate = (data: string) => (
+  `import React from "react";\n\n const MyComponent = () => (\n${data}\n);\n\nexport default MyComponent;`
+);
 
 function getWebviewOptions(extensionUri: vscode.Uri): vscode.WebviewOptions {
   return {
@@ -57,4 +101,4 @@ function getWebviewOptions(extensionUri: vscode.Uri): vscode.WebviewOptions {
     // And restrict the webview to only loading content from our extension's `media` directory.
     localResourceRoots: [vscode.Uri.joinPath(extensionUri, "out")],
   };
-}
+};

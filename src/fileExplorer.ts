@@ -293,24 +293,4 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 		}
 		return treeItem;
 	}
-}
-
-export class FileExplorer {
-	constructor(context: vscode.ExtensionContext) {
-
-		if (!context.storageUri) {
-			vscode.window.showInformationMessage('Open a workspace to start using Bricks Design to Code Tool');
-			return;
-		}
-
-		const treeDataProvider = new FileSystemProvider(context.storageUri);
-		treeDataProvider.createDirectory(vscode.Uri.parse(context.storageUri.toString() + '/bricks-workspace'));
-		treeDataProvider.writeFile(vscode.Uri.parse(context.storageUri.toString() + '/bricks-workspace/file.ts'), Buffer.from('let a:number = true; console.log(a);'), { create: true, overwrite: true });
-		context.subscriptions.push(vscode.window.createTreeView('bricksWorkspace', { treeDataProvider }));
-		vscode.commands.registerCommand('bricksDesignToCode.openFile', (resource) => this.openResource(resource));
-	}
-
-	private openResource(resource: vscode.Uri): void {
-		vscode.window.showTextDocument(resource);
-	}
-}
+};
