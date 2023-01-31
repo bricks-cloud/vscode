@@ -13,7 +13,10 @@
   "activationEvents": [
     "onCommand:bricksDesignToCode.openFile",
     "onCommand:bricksDesignToCode.openWebview",
-    "onCommand:bricksDesignToCode.handleUri"
+    "onCommand:bricksDesignToCode.handleUri",
+    "onCommand:server.start",
+    "onCommand:server.end",
+    "onCommand:server.preview.refresh"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -47,6 +50,18 @@
       {
         "command": "bricksDesignToCode.handleUri",
         "title": "Start handling Uris"
+      },
+      {
+        "command": "server.start",
+        "title": "Start dev server"
+      },
+      {
+        "command": "server.end",
+        "title": "End dev server"
+      },
+      {
+        "command": "server.preview.refresh",
+        "title": "Refresh dev server"
       }
     ]
   },
