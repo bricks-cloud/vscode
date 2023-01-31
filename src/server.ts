@@ -1,27 +1,27 @@
 // Credits: https://github.com/microsoft/vscode-livepreview
-var http = require("http");
-var fs = require("fs");
-var path = require("path");
-var url = require("url");
+import http, { IncomingMessage, ServerResponse } from "http";
+import fs from "fs";
+import path from "path";
+import url from "url";
 
 const port = 4000;
-var server: any;
+let server: any;
 
 export function start(basePath: string): void {
   server = http
-    .createServer(function (req: any, res: any) {
-      var parsedURL = url.parse(req.url, true);
+    .createServer(function (req: IncomingMessage, res: ServerResponse) {
+      let parsedURL = url.parse(req.url || "", true);
 
-      let host = parsedURL.host == null ? "" : parsedURL.host;
+      let host = parsedURL.host === null ? "" : parsedURL.host;
       let urlWithoutQueries = host + parsedURL.pathname;
 
       let fileurl = urlWithoutQueries;
 
-      if (urlWithoutQueries == "/") {
+      if (urlWithoutQueries === "/") {
         fileurl = "index.html";
       }
 
-      var stream = fs.createReadStream(path.join(basePath, fileurl));
+      let stream = fs.createReadStream(path.join(basePath, fileurl));
 
       stream.on("error", function () {
         res.writeHead(404);
