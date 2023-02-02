@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import { FileSystemProvider } from "./fileExplorer";
 import { Server } from "socket.io";
-import prettier from "prettier";
 import * as bp from "./browserPreview";
 
 import { GeneratedCodePreviewPanel } from "./generatedCodePreviewPanel";
@@ -107,32 +106,16 @@ export async function activate(context: vscode.ExtensionContext) {
     io.on("connection", (socket) => {
       socket.emit("pong", "pong");
 
-      socket.on("selection-change", (arg) => {
-        console.log(arg);
-      });
-
-      socket.on("code-generation", (data) => {
+      socket.on("code-generation", (data, callback) => {
         const uri = vscode.Uri.parse(storageUri.toString() + '/bricks-workspace/GeneratedCode.js');
-        const formatedCode = prettier.format(insertIntoTemplate(data), { semi: true, parser: "babel" });
-        treeDataProvider.writeFile(uri, Buffer.from(formatedCode), { create: true, overwrite: true });
+        treeDataProvider.writeFile(uri, Buffer.from(data), { create: true, overwrite: true });
+        callback({
+          status: "ok"
+        });
       });
     });
   }
 }
-
-const insertIntoTemplate = (data: string) => (
-  `import React from "react";\n\n const MyComponent = () => (\n${data}\n);\n\nexport default MyComponent;`
-);
-
-function getWebviewOptions(extensionUri: vscode.Uri): vscode.WebviewOptions {
-  return {
-    // Enable javascript in the webview
-    enableScripts: true,
-
-    // And restrict the webview to only loading content from our extension's `media` directory.
-    localResourceRoots: [vscode.Uri.joinPath(extensionUri, "out")],
-  };
-};
 
 // function getWebviewOptions(extensionUri: vscode.Uri): vscode.WebviewOptions {
 //   return {
@@ -142,4 +125,4 @@ function getWebviewOptions(extensionUri: vscode.Uri): vscode.WebviewOptions {
 //     // And restrict the webview to only loading content from our extension's `media` directory.
 //     localResourceRoots: [vscode.Uri.joinPath(extensionUri, "out")],
 //   };
-// }
+// };
