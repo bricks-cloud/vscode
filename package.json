@@ -11,24 +11,10 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:bricksDesignToCode.openFile",
-    "onCommand:bricksDesignToCode.openWebview",
-    "onCommand:bricksDesignToCode.handleUri",
-    "onCommand:server.start",
-    "onCommand:server.end",
-    "onCommand:server.preview.refresh"
+    "*"
   ],
   "main": "./out/extension.js",
   "contributes": {
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "bricksDesignToCode",
-          "title": "Bricks Design To Code",
-          "icon": "src/asset/bricks-logo.png"
-        }
-      ]
-    },
     "views": {
       "explorer": [
         {
