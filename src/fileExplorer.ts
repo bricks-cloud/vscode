@@ -7,7 +7,6 @@ import rimraf from 'rimraf';
 //#region Utilities
 
 namespace _ {
-
 	function handleResult<T>(resolve: (result: T) => void, reject: (error: Error) => void, error: Error | null | undefined, result: T): void {
 		if (error) {
 			reject(massageError(error));
