@@ -1,40 +1,28 @@
 // Credits: https://github.com/microsoft/vscode-livepreview
-import http, { IncomingMessage, ServerResponse } from "http";
-import fs from "fs";
-import path from "path";
-import url from "url";
+import Webpack from "webpack";
+import WebpackDevServer from "webpack-dev-server";
+import createWebpackConfig from "./createWebpackConfig";
 
-const port = 4000;
-let server: any;
+// const port = 4000;
+let server: WebpackDevServer | undefined;
 
-export function start(basePath: string): void {
-  server = http
-    .createServer(function (req: IncomingMessage, res: ServerResponse) {
-      let parsedURL = url.parse(req.url || "", true);
+export function start(extensionPath: string, workspacePath: string): void {
+  const webpackConfig = createWebpackConfig(extensionPath, workspacePath);
 
-      let host = parsedURL.host === null ? "" : parsedURL.host;
-      let urlWithoutQueries = host + parsedURL.pathname;
+  const compiler = Webpack(webpackConfig);
+  const devServerOptions = { ...webpackConfig.devServer, open: false };
+  server = new WebpackDevServer(devServerOptions, compiler);
 
-      let fileurl = urlWithoutQueries;
-
-      if (urlWithoutQueries === "/") {
-        fileurl = "index.html";
-      }
-
-      let stream = fs.createReadStream(path.join(basePath, fileurl));
-
-      stream.on("error", function () {
-        res.writeHead(404);
-        res.end();
-      });
-
-      stream.pipe(res);
-    })
-    .listen(port);
-  console.log("started server");
+  server.startCallback(() => {
+    console.log("started server");
+  });
 }
 
 export function end(): void {
-  server.close();
-  console.log("closed server");
+  if (server) {
+    server.stopCallback(() => {
+      console.log("closed server");
+      server = undefined;
+    });
+  }
 }

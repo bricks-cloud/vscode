@@ -39,6 +39,7 @@ export class BrowserPreview {
 
     // open server
     BrowserPreview.currentPanel._isServerOn = BrowserPreview.openServer(
+      extensionUri.path,
       BrowserPreview.currentPanel._path
     );
     // Set the webview's initial html content
@@ -129,9 +130,13 @@ export class BrowserPreview {
     }
   }
 
-  public static openServer(path: vscode.WorkspaceFolder | undefined): boolean {
+  public static openServer(
+    extensionPath: string,
+    path: vscode.WorkspaceFolder | undefined
+  ): boolean {
     if (path) {
-      server.start(path.uri.fsPath);
+      const workspacePath = path.uri.fsPath;
+      server.start(extensionPath, workspacePath);
       vscode.window.showInformationMessage("started server");
       return true;
     }
