@@ -9,6 +9,7 @@ const createWebpackConfig = (extensionPath: string): Webpack.Configuration => {
   const cssLoaderList = ["style-loader", "css-loader"].map((loader) =>
     require.resolve(loader)
   );
+  const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
 
   return {
     mode: "development",
@@ -22,6 +23,7 @@ const createWebpackConfig = (extensionPath: string): Webpack.Configuration => {
       new Webpack.ProvidePlugin({
         React: "react",
       }),
+      new ReactRefreshWebpackPlugin(),
     ],
     devtool: false,
     resolve: {
@@ -41,6 +43,7 @@ const createWebpackConfig = (extensionPath: string): Webpack.Configuration => {
             loader: babelLoader,
             options: {
               presets: babelPresetList,
+              plugins: [require.resolve("react-refresh/babel")],
             },
           },
         },
