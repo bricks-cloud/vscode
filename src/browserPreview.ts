@@ -1,6 +1,9 @@
 // Credits: https://github.com/microsoft/vscode-livepreview
 import * as vscode from "vscode";
 import * as server from "./server";
+import fs from "fs";
+import path from "path";
+import createJSTemplate from "./createJSTemplate";
 
 export const PORTNUM = 4000;
 export class BrowserPreview {
@@ -13,13 +16,12 @@ export class BrowserPreview {
 
   private readonly _panel: vscode.WebviewPanel;
   private readonly _extensionUri: vscode.Uri;
-  private _path: vscode.WorkspaceFolder | undefined;
   private _disposables: vscode.Disposable[] = [];
   private _isServerOn = false;
 
   public static createOrShow(extensionUri: vscode.Uri) {
     const currentColumn = vscode.window.activeTextEditor?.viewColumn ?? 1;
-    const column = currentColumn + 1; //TODO: use new column
+    const column = currentColumn + 1;
 
     // If we already have a panel, show it.
     if (BrowserPreview.currentPanel) {
@@ -39,11 +41,10 @@ export class BrowserPreview {
 
     // open server
     BrowserPreview.currentPanel._isServerOn = BrowserPreview.openServer(
-      extensionUri.path,
-      BrowserPreview.currentPanel._path
+      extensionUri.path
     );
     // Set the webview's initial html content
-    BrowserPreview.refreshBrowserPreview(false);
+    BrowserPreview.refreshBrowserPreview(extensionUri.path);
   }
 
   public static revive(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
@@ -54,41 +55,9 @@ export class BrowserPreview {
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
     this._panel = panel;
     this._extensionUri = extensionUri;
-    this._path = vscode.workspace.workspaceFolders?.[0];
 
-    // Listen for when the panel is disposed
-    // This happens when the user closes the panel or when the panel is closed programmatically
+    // Triggered when the panel is destroyed
     this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
-
-    // Update the content based on view changes
-    this._panel.onDidChangeViewState(
-      (e) => {
-        if (this._panel.visible) {
-          this._update();
-        }
-      },
-      null,
-      this._disposables
-    );
-
-    // Handle messages from the webview
-    this._panel.webview.onDidReceiveMessage(
-      (message) => {
-        switch (message.command) {
-          case "alert":
-            vscode.window.showErrorMessage(message.text);
-            return;
-        }
-      },
-      null,
-      this._disposables
-    );
-  }
-
-  public doRefactor() {
-    // Send a message to the webview webview.
-    // You can send any JSON serializable data.
-    this._panel.webview.postMessage({ command: "refactor" });
   }
 
   public dispose() {
@@ -106,16 +75,35 @@ export class BrowserPreview {
     }
   }
 
-  public static refreshBrowserPreview(showMsg: boolean = true) {
-    if (this.currentPanel) {
-      this.currentPanel._setHtml(
-        this.currentPanel._panel.webview,
-        "http://127.0.0.1:" + PORTNUM
+  public static refreshBrowserPreview(extensionPath: string) {
+    const editor = vscode.window.activeTextEditor;
+
+    if (!editor) {
+      vscode.window.showInformationMessage(
+        "You have to open a file first before previewing."
       );
-      if (showMsg) {
-        vscode.window.showInformationMessage("refreshed preview");
-      }
+      return;
     }
+
+    const currentComponentPath = editor.document.uri.path;
+    const activeFileName = currentComponentPath.split("/").pop() as string;
+    const currentComponentName = activeFileName.split(".")[0];
+
+    fs.writeFileSync(
+      path.resolve(extensionPath, "preview", "index.js"),
+      createJSTemplate(currentComponentPath, currentComponentName)
+    );
+
+    if (this.currentPanel) {
+      this.currentPanel._setHtml(this.currentPanel._panel.webview);
+      vscode.window.showInformationMessage("refreshed preview");
+    }
+  }
+
+  public static openServer(extensionPath: string): boolean {
+    server.start(extensionPath);
+    vscode.window.showInformationMessage("started server");
+    return true;
   }
 
   public static closeServer() {
@@ -130,77 +118,29 @@ export class BrowserPreview {
     }
   }
 
-  public static openServer(
-    extensionPath: string,
-    path: vscode.WorkspaceFolder | undefined
-  ): boolean {
-    if (path) {
-      const workspacePath = path.uri.fsPath;
-      server.start(extensionPath, workspacePath);
-      vscode.window.showInformationMessage("started server");
-      return true;
-    }
-    return false;
-  }
-
-  private _update() {
-    console.log("updated");
-  }
-
-  private _setHtml(webview: vscode.Webview, url: string) {
+  private _setHtml(webview: vscode.Webview) {
     this._panel.title = "LocalHost Preview";
-    this._panel.webview.html = this._getHtmlForWebview(webview, url);
-  }
 
-  private _getHtmlForWebview(webview: vscode.Webview, url: string) {
-    // Local path to css styles
-    const styleResetPath = vscode.Uri.joinPath(
-      this._extensionUri,
-      "media",
-      "reset.css"
+    const stylesResetUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this._extensionUri, "media", "reset.css")
     );
-    const stylesPathMainPath = vscode.Uri.joinPath(
-      this._extensionUri,
-      "media",
-      "vscode.css"
+    const stylesMainUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css")
     );
-
-    // Uri to load styles into webview
-    const stylesResetUri = webview.asWebviewUri(styleResetPath);
-    const stylesMainUri = webview.asWebviewUri(stylesPathMainPath);
-
-    // Use a nonce to only allow specific scripts to be run
-    const nonce = new Date().getTime() + "" + new Date().getMilliseconds();
-
-    return `<!DOCTYPE html>
-			<html lang="en">
-			<head>
-				<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
-
-				<!--
-					Use a content security policy to only allow loading images from https or from our extension directory,
-					and only allow scripts that have a specific nonce.
-				-->
-				<meta http-equiv="Content-Security-Policy" content="
-				default-src 'none';
-				font-src ${this._panel.webview.cspSource};
-				style-src ${this._panel.webview.cspSource};
-				script-src 'nonce-${nonce}';
-				frame-src *;
-				">
-				<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-				<link href="${stylesResetUri}" rel="stylesheet">
-				<link href="${stylesMainUri}" rel="stylesheet">
-
-				<title>LocalHost Preview</title>
-			</head>
-			<body>
-
-				<iframe src="http://localhost:${PORTNUM}/" sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
-				
-			</body>
-			</html>`;
+    this._panel.webview.html = `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link href="${stylesResetUri}" rel="stylesheet">
+      <link href="${stylesMainUri}" rel="stylesheet">
+      <title>React Component Preview</title>
+    </head>
+    <body>
+      <div id="root"></div>
+      <script src="http://localhost:9132/bundle.js"></script>
+    </body>
+    </html>`;
   }
 }
 

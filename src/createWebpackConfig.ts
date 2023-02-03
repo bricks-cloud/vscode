@@ -1,10 +1,7 @@
 import * as path from "path";
 import * as Webpack from "webpack";
 
-const createWebpackConfig = (
-  extensionPath: string,
-  workspacePath: string
-): Webpack.Configuration => {
+const createWebpackConfig = (extensionPath: string): Webpack.Configuration => {
   const babelLoader = require.resolve("babel-loader");
   const babelPresetList = ["@babel/preset-env", "@babel/preset-react"].map(
     (preset) => require.resolve(preset)
@@ -28,10 +25,7 @@ const createWebpackConfig = (
     ],
     devtool: false,
     resolve: {
-      modules: [
-        path.resolve(extensionPath, "node_modules"),
-        path.resolve(workspacePath, "node_modules"),
-      ],
+      modules: [path.resolve(extensionPath, "node_modules")],
       extensions: [".js", ".jsx"],
     },
     module: {
