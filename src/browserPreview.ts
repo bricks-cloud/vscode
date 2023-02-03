@@ -137,8 +137,7 @@ export class BrowserPreview {
       <title>React Component Preview</title>
     </head>
     <body>
-      <div id="root"></div>
-      <script src="http://localhost:9132/bundle.js"></script>
+      <iframe src="http://localhost:9132/" sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
     </body>
     </html>`;
   }
