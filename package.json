@@ -38,16 +38,8 @@
         "title": "Start handling Uris"
       },
       {
-        "command": "server.start",
-        "title": "Start dev server"
-      },
-      {
-        "command": "server.end",
-        "title": "End dev server"
-      },
-      {
-        "command": "server.preview.refresh",
-        "title": "Refresh dev server"
+        "command": "preview.show",
+        "title": "Show preview of currently opened file"
       }
     ]
   },

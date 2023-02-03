@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { FileSystemProvider } from "./fileExplorer";
 import { Server } from "socket.io";
-import { BrowserPreview } from "./browserPreview";
+import * as Preview from "./preview";
 
 export class FileExplorer {
   private readonly bricksFileSystem: FileSystemProvider;
@@ -49,20 +49,8 @@ export async function activate(context: vscode.ExtensionContext) {
    * Live preview
    */
   context.subscriptions.push(
-    vscode.commands.registerCommand("server.start", () => {
-      BrowserPreview.createOrShow(context.extensionUri);
-    })
-  );
-
-  context.subscriptions.push(
-    vscode.commands.registerCommand("server.preview.refresh", () => {
-      BrowserPreview.refreshBrowserPreview(context.extensionUri.path);
-    })
-  );
-
-  context.subscriptions.push(
-    vscode.commands.registerCommand("server.end", () => {
-      BrowserPreview.closeServer();
+    vscode.commands.registerCommand("preview.show", () => {
+      Preview.createOrShow(context.extensionUri);
     })
   );
 
