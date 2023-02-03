@@ -10,6 +10,20 @@ let server: WebpackDevServer | undefined;
 const disposables: vscode.Disposable[] = [];
 
 export async function createOrShow(extensionUri: vscode.Uri) {
+  if (webviewPanel) {
+    webviewPanel.reveal(vscode.ViewColumn.Beside);
+    return;
+  }
+
+  if (!shouldOpenPreview()) {
+    vscode.window.showInformationMessage(
+      "We cannot show a live preview for the file you opened."
+    );
+    return;
+  }
+
+  vscode.window.showInformationMessage("Starting preview...");
+
   createWrapperForCurrentlyOpenedReactFile(extensionUri.path);
 
   await startWebpackServer(extensionUri.path);
@@ -17,27 +31,28 @@ export async function createOrShow(extensionUri: vscode.Uri) {
   setupWebviewPanel(extensionUri);
 }
 
+function shouldOpenPreview(): boolean {
+  const languageId = vscode.window.activeTextEditor?.document.languageId || "";
+
+  // Languages supported in live preview by this extension
+  const supportedLanguageIds = ["javascript", "javascriptreact"];
+
+  return !!supportedLanguageIds.includes(languageId);
+}
+
 function createWrapperForCurrentlyOpenedReactFile(extensionPath: string) {
-  const editor = vscode.window.activeTextEditor;
+  const componentPath = vscode.window.activeTextEditor!.document.uri.path;
+  const activeFileName = componentPath.split("/").pop() as string;
+  const componentName = activeFileName.split(".")[0];
 
-  if (!editor) {
-    vscode.window.showInformationMessage("You have to open a React file.");
-    return;
-  }
+  const code = `
+  import ReactDOM from "react-dom";
+  import ${componentName} from "${componentPath}";
 
-  const currentComponentPath = editor.document.uri.path;
-  const activeFileName = currentComponentPath.split("/").pop() as string;
-  const currentComponentName = activeFileName.split(".")[0];
+  ReactDOM.render(<${componentName}/>, document.getElementById("root"));
+  `;
 
-  fs.writeFileSync(
-    path.resolve(extensionPath, "preview", "index.js"),
-    `
-    import ReactDOM from "react-dom";
-    import ${currentComponentName} from "${currentComponentPath}";
-
-    ReactDOM.render(<${currentComponentName}/>, document.getElementById("root"));
-    `
-  );
+  fs.writeFileSync(path.resolve(extensionPath, "preview", "index.js"), code);
 }
 
 function setupWebviewPanel(extensionUri: vscode.Uri) {
