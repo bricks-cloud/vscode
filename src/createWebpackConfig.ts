@@ -2,14 +2,9 @@ import * as path from "path";
 import * as Webpack from "webpack";
 
 const createWebpackConfig = (extensionPath: string): Webpack.Configuration => {
-  const babelLoader = require.resolve("babel-loader");
-  const babelPresetList = ["@babel/preset-env", "@babel/preset-react"].map(
-    (preset) => require.resolve(preset)
-  );
   const cssLoaderList = ["style-loader", "css-loader"].map((loader) =>
     require.resolve(loader)
   );
-  const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
 
   return {
     mode: "development",
@@ -23,7 +18,6 @@ const createWebpackConfig = (extensionPath: string): Webpack.Configuration => {
       new Webpack.ProvidePlugin({
         React: "react",
       }),
-      new ReactRefreshWebpackPlugin(),
     ],
     devtool: false,
     resolve: {
@@ -37,13 +31,12 @@ const createWebpackConfig = (extensionPath: string): Webpack.Configuration => {
           use: ["htmlLoader"],
         },
         {
-          test: /\.(js|jsx)$/,
+          test: /\.(tsx|ts|jsx|js)$/,
           exclude: /node_modules/,
           use: {
-            loader: babelLoader,
+            loader: require.resolve("ts-loader"),
             options: {
-              presets: babelPresetList,
-              plugins: [require.resolve("react-refresh/babel")],
+              configFile: path.resolve(extensionPath, "tsconfig.preview.json"),
             },
           },
         },

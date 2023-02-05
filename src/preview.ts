@@ -35,7 +35,7 @@ function shouldOpenPreview(): boolean {
   const languageId = vscode.window.activeTextEditor?.document.languageId || "";
 
   // Languages supported in live preview by this extension
-  const supportedLanguageIds = ["javascript", "javascriptreact"];
+  const supportedLanguageIds = ["typescriptreact", "javascriptreact"];
 
   return !!supportedLanguageIds.includes(languageId);
 }
