@@ -2,10 +2,6 @@ import * as path from "path";
 import * as Webpack from "webpack";
 
 const createWebpackConfig = (extensionPath: string): Webpack.Configuration => {
-  const cssLoaderList = ["style-loader", "css-loader"].map((loader) =>
-    require.resolve(loader)
-  );
-
   return {
     mode: "development",
     context: path.resolve(extensionPath, "preview"),
@@ -34,15 +30,19 @@ const createWebpackConfig = (extensionPath: string): Webpack.Configuration => {
           test: /\.(tsx|ts|jsx|js)$/,
           exclude: /node_modules/,
           use: {
-            loader: require.resolve("ts-loader"),
+            loader: require.resolve("babel-loader"),
             options: {
-              configFile: path.resolve(extensionPath, "tsconfig.preview.json"),
+              presets: [
+                require.resolve("@babel/preset-env"),
+                require.resolve("@babel/preset-react"),
+                require.resolve("@babel/preset-typescript"),
+              ],
             },
           },
         },
         {
           test: /\.css$/,
-          use: cssLoaderList,
+          use: [require.resolve("style-loader"), require.resolve("css-loader")],
         },
         {
           test: /\.(png|jpe?g|gif|svg)$/i,

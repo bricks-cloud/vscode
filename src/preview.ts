@@ -4,6 +4,7 @@ import path from "path";
 import Webpack from "webpack";
 import WebpackDevServer from "webpack-dev-server";
 import createWebpackConfig from "./createWebpackConfig";
+import http from "http";
 
 let webviewPanel: vscode.WebviewPanel | undefined;
 let server: WebpackDevServer | undefined;
@@ -24,7 +25,16 @@ export async function createOrShow(extensionUri: vscode.Uri) {
 
   vscode.window.showInformationMessage("Starting preview...");
 
-  createWrapperForCurrentlyOpenedReactFile(extensionUri.path);
+  const languageId = vscode.window.activeTextEditor?.document.languageId || "";
+
+  switch (languageId) {
+    case "typescriptreact":
+    case "javascriptreact":
+      createWrapperForCurrentlyOpenedReactFile(extensionUri.path);
+      break;
+    case "html":
+      break;
+  }
 
   await startWebpackServer(extensionUri.path);
 
@@ -35,7 +45,7 @@ function shouldOpenPreview(): boolean {
   const languageId = vscode.window.activeTextEditor?.document.languageId || "";
 
   // Languages supported in live preview by this extension
-  const supportedLanguageIds = ["typescriptreact", "javascriptreact"];
+  const supportedLanguageIds = ["typescriptreact", "javascriptreact", "html"];
 
   return !!supportedLanguageIds.includes(languageId);
 }
