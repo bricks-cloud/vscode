@@ -105,6 +105,7 @@ function setupWebviewPanel(extensionUri: vscode.Uri) {
     async () => {
       await stopWebpackServer();
       disposeAll(disposables);
+      webviewPanel = undefined;
     },
     null,
     disposables
