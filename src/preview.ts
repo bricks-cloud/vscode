@@ -55,12 +55,13 @@ function createWrapperForCurrentlyOpenedReactFile(extensionPath: string) {
   const activeFileName = componentPath.split("/").pop() as string;
   const componentName = activeFileName.split(".")[0];
 
-  const code = `
-  import ReactDOM from "react-dom";
-  import ${componentName} from "${componentPath}";
+  const code = `import { createRoot } from "react-dom/client";
+import ${componentName} from "${componentPath}";
 
-  ReactDOM.render(<${componentName}/>, document.getElementById("root"));
-  `;
+const root = createRoot(document.getElementById("root"));
+
+root.render(<${componentName} />);
+`;
 
   fs.writeFileSync(path.resolve(extensionPath, "preview", "index.js"), code);
 }
@@ -122,6 +123,9 @@ function setupWebviewPanel(extensionUri: vscode.Uri) {
   );
 }
 
+/**
+ * Webpack server for jsx and tsx files
+ */
 function startWebpackServer(extensionPath: string) {
   const webpackConfig = createWebpackConfig(extensionPath);
 
@@ -157,6 +161,13 @@ function stopWebpackServer() {
     });
   });
 }
+
+/**
+ * Basic node http server for html files
+ */
+function startHttpServer() {}
+
+function stopHttpServer() {}
 
 function disposeAll(disposables: vscode.Disposable[]): void {
   while (disposables.length) {

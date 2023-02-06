@@ -15,12 +15,7 @@ module.exports = (env, argv) => ({
       // Converts TypeScript code to JavaScript
       {
         test: /\.tsx?$/,
-        use: {
-          loader: "ts-loader",
-          options: {
-            configFile: path.resolve(__dirname, "tsconfig.extension.json"),
-          },
-        },
+        use: "ts-loader",
         exclude: /node_modules/,
       },
 
