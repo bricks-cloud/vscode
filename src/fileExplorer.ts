@@ -154,6 +154,9 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 
 	private _onDidChangeFile: vscode.EventEmitter<vscode.FileChangeEvent[]>;
 	private storageUri: vscode.Uri;
+	private _onDidChangeTreeData: vscode.EventEmitter<Entry | undefined | null | void> = new vscode.EventEmitter<Entry | undefined | null | void>();
+	readonly onDidChangeTreeData: vscode.Event<Entry | undefined | null | void> = this
+		._onDidChangeTreeData.event;
 
 	constructor(storageUri: vscode.Uri) {
 		this._onDidChangeFile = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
@@ -162,6 +165,10 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 
 	get onDidChangeFile(): vscode.Event<vscode.FileChangeEvent[]> {
 		return this._onDidChangeFile.event;
+	}
+
+	refresh(): void {
+		this._onDidChangeTreeData.fire();
 	}
 
 	watch(uri: vscode.Uri, options: { recursive: boolean; excludes: string[]; }): vscode.Disposable {

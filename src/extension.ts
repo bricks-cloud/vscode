@@ -3,6 +3,11 @@ import { FileSystemProvider } from "./fileExplorer";
 import { Server } from "socket.io";
 import * as Preview from "./preview";
 
+interface File {
+  content: string,
+  path: string,
+}
+
 export class FileExplorer {
   private readonly bricksFileSystem: FileSystemProvider;
 
@@ -12,7 +17,8 @@ export class FileExplorer {
   ) {
     this.bricksFileSystem = bricksFileSystem;
 
-    if (!context.storageUri) {
+    const { storageUri } = context;
+    if (!storageUri?.toString()) {
       vscode.window.showInformationMessage(
         "Open a workspace to start using Bricks Design to Code Tool"
       );
@@ -20,11 +26,11 @@ export class FileExplorer {
     }
 
     this.bricksFileSystem.createDirectory(
-      vscode.Uri.parse(context.storageUri.toString() + "/bricks-workspace")
+      vscode.Uri.parse(storageUri.toString() + "/bricks-workspace")
     );
     this.bricksFileSystem.writeFile(
       vscode.Uri.parse(
-        context.storageUri.toString() + "/bricks-workspace/GeneratedCode.js"
+        storageUri.toString() + "/bricks-workspace/GeneratedComponent.jsx"
       ),
       Buffer.from("/* Select components using the Figma Plugin */"),
       { create: true, overwrite: true }
@@ -34,8 +40,13 @@ export class FileExplorer {
         treeDataProvider: this.bricksFileSystem,
       })
     );
+
     vscode.commands.registerCommand("bricksDesignToCode.openFile", (resource) =>
       this.openResource(resource)
+    );
+
+    vscode.commands.registerCommand("bricksDesignToCode.refresh", () =>
+      this.bricksFileSystem.refresh()
     );
   }
 
@@ -75,19 +86,39 @@ export async function activate(context: vscode.ExtensionContext) {
       socket.emit("pong", "pong");
 
       socket.on("code-generation", (data, callback) => {
-        const uri = vscode.Uri.parse(
-          storageUri.toString() + "/bricks-workspace/GeneratedCode.js"
+        const files = data as File[];
+
+        const deleteUri = vscode.Uri.parse(
+          storageUri.toString() + "/bricks-workspace"
         );
-        treeDataProvider.writeFile(uri, Buffer.from(data), {
-          create: true,
-          overwrite: true,
-        });
-        callback({
-          status: "ok",
-        });
+
+        const result = treeDataProvider.delete(deleteUri, { recursive: true });
+
+        if (result) {
+          result.then(() => {
+            files.forEach(({ content, path }) => {
+              const uri = vscode.Uri.parse(
+                storageUri.toString() + path
+              );
+
+              Buffer.from(content);
+
+              treeDataProvider.writeFile(uri, Buffer.from(content), {
+                create: true,
+                overwrite: true,
+              });
+
+              treeDataProvider.refresh();
+              
+              callback({
+                status: "ok",
+              });
+            });
+          });
+        }
       });
     });
   }
 }
 
-export async function deactivate() {}
+export async function deactivate() { }

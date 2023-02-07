@@ -23,6 +23,15 @@
         }
       ]
     },
+    "menus": {
+      "view/title": [
+        {
+          "command": "bricksDesignToCode.refreshEntry",
+          "when": "view == nodeDependencies",
+          "group": "navigation"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "bricksDesignToCode.openFile",
@@ -40,6 +49,10 @@
       {
         "command": "preview.show",
         "title": "Show preview of currently opened file"
+      },
+      {
+        "command": "bricksDesignToCode.refreshEntry",
+        "title": "Refresh"
       }
     ]
   },
