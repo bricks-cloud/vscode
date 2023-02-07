@@ -1,7 +1,16 @@
 import * as path from "path";
 import * as Webpack from "webpack";
+import * as vscode from "vscode";
 
-const createWebpackConfig = (extensionPath: string): Webpack.Configuration => {
+export const createWebpackConfig = (
+  extensionPath: string
+): Webpack.Configuration => {
+  const activeTextEditor = vscode.window.activeTextEditor;
+
+  if (!activeTextEditor) {
+    throw new Error("No file is currently opened!");
+  }
+
   return {
     mode: "development",
     context: path.resolve(extensionPath, "preview"),
@@ -64,7 +73,6 @@ const createWebpackConfig = (extensionPath: string): Webpack.Configuration => {
     },
     cache: true,
     stats: "errors-only",
-    //@ts-ignore
     devServer: {
       static: {
         directory: path.resolve(extensionPath, "preview"),
@@ -80,5 +88,3 @@ const createWebpackConfig = (extensionPath: string): Webpack.Configuration => {
     },
   };
 };
-
-export default createWebpackConfig;

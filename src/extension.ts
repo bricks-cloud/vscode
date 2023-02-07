@@ -54,8 +54,6 @@ export async function activate(context: vscode.ExtensionContext) {
     })
   );
 
-  // TODO: implement WebviewPanelSerializer so webviews can restore automatically when VS Code restarts
-
   /**
    * Socket server
    */
