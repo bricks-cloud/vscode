@@ -4,8 +4,8 @@ import { Server } from "socket.io";
 import * as Preview from "./preview";
 
 interface File {
-  content: string,
-  path: string,
+  content: string;
+  path: string;
 }
 
 export class FileExplorer {
@@ -95,9 +95,7 @@ export async function activate(context: vscode.ExtensionContext) {
         if (result) {
           result.then(() => {
             files.forEach(({ content, path }) => {
-              const uri = vscode.Uri.parse(
-                storageUri.toString() + path
-              );
+              const uri = vscode.Uri.parse(storageUri.toString() + path);
 
               Buffer.from(content);
 
@@ -107,7 +105,9 @@ export async function activate(context: vscode.ExtensionContext) {
               });
 
               treeDataProvider.refresh();
-              
+
+              Preview.createOrShow(context.extensionUri);
+
               callback({
                 status: "ok",
               });
@@ -119,4 +119,4 @@ export async function activate(context: vscode.ExtensionContext) {
   }
 }
 
-export async function deactivate() { }
+export async function deactivate() {}
