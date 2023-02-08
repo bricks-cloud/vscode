@@ -84,7 +84,7 @@ export async function activate(context: vscode.ExtensionContext) {
       socket.emit("pong", "pong");
 
       socket.on("code-generation", (data, callback) => {
-        const files = data as File[];
+        const files: File[] = data.files;
 
         const deleteUri = vscode.Uri.parse(
           storageUri.toString() + "/bricks-workspace"
