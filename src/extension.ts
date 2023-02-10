@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { FileSystemProvider } from "./fileExplorer";
 import { Server } from "socket.io";
 import * as Preview from "./preview";
+import { text } from "stream/consumers";
 
 interface File {
   content: string;
@@ -84,6 +85,7 @@ export async function activate(context: vscode.ExtensionContext) {
       socket.emit("pong", "pong");
 
       socket.on("code-generation", (data, callback) => {
+
         const files: File[] = data.files;
 
         const deleteUri = vscode.Uri.parse(
@@ -94,19 +96,38 @@ export async function activate(context: vscode.ExtensionContext) {
 
         if (result) {
           result.then(() => {
-            files.forEach(({ content, path }) => {
+            files.forEach(async ({ content, path }) => {
               const uri = vscode.Uri.parse(storageUri.toString() + path);
 
               Buffer.from(content);
 
-              treeDataProvider.writeFile(uri, Buffer.from(content), {
+              const writeFileResult = treeDataProvider.writeFile(uri, Buffer.from(content), {
                 create: true,
                 overwrite: true,
               });
 
-              treeDataProvider.refresh();
+              if (writeFileResult) {
+                writeFileResult.then(() => {
+                  // const docUri = vscode.Uri.parse(
+                  //   storageUri.toString() + "/bricks-workspace/GeneratedComponent.jsx"
+                  // );
 
-              Preview.createOrShow(context.extensionUri);
+                  const openTextDocResult = vscode.workspace.openTextDocument(vscode.Uri.parse(
+                    storageUri.toString() + "/bricks-workspace/GeneratedComponent.jsx"
+                  ));
+
+                  openTextDocResult.then((textDoc: vscode.TextDocument) => {
+                    // const openResult = vscode.commands.executeCommand("vscode.open", docUri, {
+                    //   preserveFocus: true,
+                    //   viewColumn: vscode.ViewColumn.Active,
+                    // });
+
+                    // openResult.then(() => {
+                    Preview.createOrShow(context.extensionUri);
+                    // });
+                  });
+                });
+              }
 
               callback({
                 status: "ok",
@@ -119,4 +140,4 @@ export async function activate(context: vscode.ExtensionContext) {
   }
 }
 
-export async function deactivate() {}
+export async function deactivate() { }
