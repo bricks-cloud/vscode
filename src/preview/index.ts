@@ -21,13 +21,6 @@ export async function createOrShow(extensionUri: vscode.Uri) {
 
   writeEntryFile(extensionUri.path);
 
-  // live reload for html
-  vscode.workspace.onDidSaveTextDocument((document) => {
-    if (document.languageId === "html") {
-      writeEntryFile(extensionUri.path);
-    }
-  }, disposables);
-
   await startWebpackServer(extensionUri.path);
 
   setupWebviewPanel(extensionUri);

@@ -33,7 +33,7 @@ export const createWebpackConfig = (
       rules: [
         {
           test: /\.(html)$/,
-          use: ["htmlLoader"],
+          use: [require.resolve("html-loader")],
         },
         {
           test: /\.(tsx|ts|jsx|js)$/,

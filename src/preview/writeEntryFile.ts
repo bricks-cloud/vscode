@@ -38,12 +38,14 @@ root.render(<${componentName} />);
 }
 
 function writeEntryFileForHtml(extensionPath: string) {
-  const fileContent = vscode.window.activeTextEditor!.document.getText();
+  const componentPath = vscode.window.activeTextEditor!.document.uri.path;
 
-  const code = `
-const root = document.getElementById("root");
+  const code = `import { createRoot } from "react-dom/client";
+import htmlString from "${componentPath}";
 
-root.innerHTML = \`${fileContent.trim()}\`;
+const root = createRoot(document.getElementById("root"));
+
+root.render(<div dangerouslySetInnerHTML={{ __html: htmlString }}></div>)
 `;
 
   fs.writeFileSync(path.resolve(extensionPath, "preview", "index.js"), code);
