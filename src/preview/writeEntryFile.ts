@@ -43,7 +43,7 @@ function writeEntryFileForHtml(extensionPath: string) {
   const code = `
 const root = document.getElementById("root");
 
-root.innerHTML = "${fileContent.trim()}";
+root.innerHTML = \`${fileContent.trim()}\`;
 `;
 
   fs.writeFileSync(path.resolve(extensionPath, "preview", "index.js"), code);

@@ -4,10 +4,15 @@ import { startWebpackServer, stopWebpackServer } from "./webpackServer";
 import { writeEntryFile } from "./writeEntryFile";
 
 let webviewPanel: vscode.WebviewPanel | undefined;
+let currentlyOpenedFilePath: string | undefined;
 const disposables: vscode.Disposable[] = [];
 
 export async function createOrShow(extensionUri: vscode.Uri) {
-  if (webviewPanel) {
+  if (
+    webviewPanel &&
+    currentlyOpenedFilePath ===
+      vscode.window.activeTextEditor?.document.uri.path
+  ) {
     webviewPanel.reveal(vscode.ViewColumn.Beside);
     return;
   }
@@ -26,16 +31,15 @@ export async function createOrShow(extensionUri: vscode.Uri) {
   await startWebpackServer(extensionUri.path);
 
   setupWebviewPanel(extensionUri);
+
+  currentlyOpenedFilePath = vscode.window.activeTextEditor?.document.uri.path;
 }
 
 function setupWebviewPanel(extensionUri: vscode.Uri) {
-  const currentColumn = vscode.window.activeTextEditor?.viewColumn ?? 1;
-  const column = currentColumn + 1;
-
   webviewPanel = vscode.window.createWebviewPanel(
     "localhostBrowserPreview",
     "LocalHost Preview",
-    column,
+    vscode.ViewColumn.Beside,
     {
       // Enable javascript in the webview
       enableScripts: true,
