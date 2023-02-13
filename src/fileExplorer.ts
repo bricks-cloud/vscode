@@ -26,16 +26,6 @@ export class FileExplorer {
       return;
     }
 
-    this.bricksFileSystem.createDirectory(
-      vscode.Uri.parse(storageUri.toString() + "/bricks-workspace")
-    );
-    this.bricksFileSystem.writeFile(
-      vscode.Uri.parse(
-        storageUri.toString() + "/bricks-workspace/GeneratedComponent.jsx"
-      ),
-      Buffer.from("/* Select components using the Figma Plugin */"),
-      { create: true, overwrite: true }
-    );
     context.subscriptions.push(
       vscode.window.createTreeView("bricksWorkspace", {
         treeDataProvider: this.bricksFileSystem,
