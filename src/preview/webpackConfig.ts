@@ -18,6 +18,7 @@ export const createWebpackConfig = (
     output: {
       filename: "bundle.js",
       path: path.resolve(extensionPath, "preview"),
+      assetModuleFilename: "assets/[name].[hash][ext]",
     },
     plugins: [
       new Webpack.ProvidePlugin({
@@ -55,11 +56,7 @@ export const createWebpackConfig = (
         },
         {
           test: /\.(png|jpe?g|gif|svg)$/i,
-          use: [
-            {
-              loader: require.resolve("file-loader"),
-            },
-          ],
+          type: "asset/resource",
         },
         {
           test: /\.(ttf|eot|woff|woff2)$/,

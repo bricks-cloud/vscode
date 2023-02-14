@@ -1,14 +1,29 @@
 {
   "compilerOptions": {
+    "target": "es2019",
     "module": "commonjs",
-    "target": "es2020",
-    "lib": ["es2020", "dom"],
-    "outDir": "out",
-    "sourceMap": true,
-    "rootDir": "src",
+    "declaration": true,
+    "isolatedModules": true,
     "strict": true,
-    "jsx": "react",
-    "esModuleInterop": true
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "importsNotUsedAsValues": "error",
+    "rootDir": "src",
+    "baseUrl": ".",
+    "moduleResolution": "node"
   },
-  "exclude": ["node_modules", ".vscode-test"]
+  "include": ["src"]
 }

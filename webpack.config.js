@@ -1,46 +1,51 @@
+//@ts-check
+
+"use strict";
+
 const path = require("path");
+const nodeExternals = require("webpack-node-externals");
 
-module.exports = (env, argv) => ({
-  mode: argv.mode === "production" ? "production" : "development",
+/**@type {import('webpack').Configuration}*/
+const config = {
+  target: "node", // vscode extensions run in a Node.js-context 📖 -> https://webpack.js.org/configuration/node/
 
-  // This is necessary because Figma's 'eval' works differently than normal eval
-  devtool: argv.mode === "production" ? false : "inline-source-map",
-
-  entry: {
-    main: "./src/view/index.tsx", // The entry point for your plugin code
+  entry: "./src/extension.ts", // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
+  externalsPresets: { node: true },
+  externals: [
+    nodeExternals(),
+    {
+      vscode: "commonjs vscode", // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
+    },
+  ],
+  output: {
+    // the bundle is stored in the 'dist' folder (check package.json), 📖 -> https://webpack.js.org/configuration/output/
+    path: path.resolve(__dirname, "dist"),
+    filename: "extension.js",
+    libraryTarget: "commonjs2",
+    devtoolModuleFilenameTemplate: "../[resource-path]",
   },
-
+  devtool: "source-map",
+  resolve: {
+    extensions: [".ts", ".js"],
+  },
   module: {
     rules: [
-      // Converts TypeScript code to JavaScript
       {
-        test: /\.tsx?$/,
-        use: "ts-loader",
+        test: /\.ts$/,
         exclude: /node_modules/,
-      },
-
-      // Enables including CSS by doing "import './file.css'" in your TypeScript code
-      {
-        test: /\.css$/,
-        include: path.resolve(__dirname, "src"),
-        use: ["style-loader", "css-loader", "postcss-loader"],
-      },
-      // Allows you to use "<%= require('./file.svg') %>" in your HTML code to get a data URI
-      // { test: /\.(png|jpg|gif|webp|svg|zip)$/, loader: [{ loader: 'url-loader' }] }
-      {
-        test: /\.(svg|png)/,
-        type: "asset/inline",
+        use: [
+          {
+            loader: "ts-loader",
+            options: {
+              compilerOptions: {
+                module: "es6", // override `tsconfig.json` so that TypeScript emits native JavaScript modules.
+              },
+            },
+          },
+        ],
       },
     ],
   },
+};
 
-  // Webpack tries these extensions for you if you omit the extension like "import './file'"
-  resolve: { extensions: [".tsx", ".ts", ".jsx", ".js"] },
-
-  output: {
-    publicPath: "",
-    assetModuleFilename: "[name][ext]",
-    filename: "[name].js",
-    path: path.resolve(__dirname, "out"), // Compile into a folder called "dist"
-  },
-});
+module.exports = config;

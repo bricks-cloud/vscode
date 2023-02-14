@@ -287,7 +287,7 @@ export class FileSystemProvider
 
     const result: [string, vscode.FileType][] = [];
     for (let i = 0; i < children.length; i++) {
-      const child = children[i];
+      const child = children[i] as string;
       const stat = await this._stat(path.join(uri.fsPath, child));
       result.push([child, stat.type]);
     }
