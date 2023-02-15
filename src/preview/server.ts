@@ -2,8 +2,8 @@
 import * as vscode from "vscode";
 import type http from "http";
 import path from "path";
-import fs from "fs";
 import express from "express";
+import * as esbuild from "esbuild-wasm";
 
 export const localhostPort = 4000;
 let server: http.Server | undefined;
@@ -18,20 +18,18 @@ export function startServer(
     console.log(req.url);
 
     if (req.url && req.url.endsWith(".jsx")) {
-      let content: string;
-      try {
-        content = fs.readFileSync(storageUri.path + req.url).toString();
-      } catch {
-        return res.status(404);
-      }
+      const result = esbuild.buildSync({
+        entryPoints: [storageUri.path + req.url],
+        nodePaths: [path.resolve(extensionUri, "node_modules")],
+        bundle: true,
+        write: false,
+      });
 
-      const compiledCode = require("@babel/core").transformSync(content, {
-        presets: [require.resolve("@babel/preset-react")],
-      }).code;
+      const bundledCode = result.outputFiles[0].text;
 
       res.type("js");
 
-      return res.send(compiledCode);
+      return res.send(bundledCode);
     } else {
       next();
     }
