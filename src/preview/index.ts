@@ -1,13 +1,16 @@
 import * as vscode from "vscode";
 import { disposeAll } from "./utils";
-import { startWebpackServer, stopWebpackServer } from "./webpackServer";
-import { writeEntryFile } from "./writeEntryFile";
+import { startServer, endServer, localhostPort } from "./server";
+// import { writeEntryFile } from "./writeEntryFile";
 
 let webviewPanel: vscode.WebviewPanel | undefined;
 let currentlyOpenedFilePath: string | undefined;
 const disposables: vscode.Disposable[] = [];
 
-export async function createOrShow(extensionUri: vscode.Uri) {
+export async function createOrShow(
+  extensionUri: vscode.Uri,
+  storageUri: vscode.Uri
+) {
   if (
     webviewPanel &&
     currentlyOpenedFilePath ===
@@ -19,9 +22,9 @@ export async function createOrShow(extensionUri: vscode.Uri) {
 
   vscode.window.showInformationMessage("Starting preview...");
 
-  writeEntryFile(extensionUri.path);
+  // writeEntryFile(extensionUri.path);
 
-  await startWebpackServer(extensionUri.path);
+  await startServer(extensionUri.path, storageUri);
 
   setupWebviewPanel(extensionUri);
 
@@ -64,7 +67,7 @@ function setupWebviewPanel(extensionUri: vscode.Uri) {
       <title>React Component Preview</title>
     </head>
     <body>
-      <iframe src="http://localhost:9132/" sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
+      <iframe src="http://localhost:${localhostPort}/" sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
     </body>
     </html>`;
 
@@ -73,7 +76,7 @@ function setupWebviewPanel(extensionUri: vscode.Uri) {
    */
   webviewPanel.onDidDispose(
     async () => {
-      await stopWebpackServer();
+      await endServer();
       disposeAll(disposables);
       webviewPanel = undefined;
     },
