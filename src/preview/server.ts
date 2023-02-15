@@ -1,8 +1,9 @@
 // Credits: https://github.com/microsoft/vscode-livepreview
-import http, { IncomingMessage, ServerResponse } from "http";
-import fs from "fs";
-import path from "path";
 import * as vscode from "vscode";
+import type http from "http";
+import path from "path";
+import fs from "fs";
+import express from "express";
 
 export const localhostPort = 4000;
 let server: http.Server | undefined;
@@ -11,47 +12,37 @@ export function startServer(
   extensionUri: string,
   storageUri: vscode.Uri
 ): Promise<void> {
-  server = http.createServer(function (
-    req: IncomingMessage,
-    res: ServerResponse
-  ) {
-    let filePath: string;
+  const app = express();
 
-    if (!req.url) {
-      res.writeHead(404);
-      res.end();
-      return;
-    }
+  app.use(function (req, res, next) {
+    console.log(req.url);
 
-    if (req.url === "/") {
-      filePath = path.join(extensionUri, "preview", "index.html");
-    } else {
-      const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.path;
-
-      if (!workspacePath) {
-        res.writeHead(500);
-        res.end();
-        return;
+    if (req.url && req.url.endsWith(".jsx")) {
+      let content: string;
+      try {
+        content = fs.readFileSync(storageUri.path + req.url).toString();
+      } catch {
+        return res.status(404);
       }
 
-      filePath = path.join(storageUri.path, req.url);
+      const compiledCode = require("@babel/core").transformSync(content, {
+        presets: [require.resolve("@babel/preset-react")],
+      }).code;
+
+      res.type("js");
+
+      return res.send(compiledCode);
+    } else {
+      next();
     }
-
-    console.log("filePath:", filePath); // TODO: should read from storage url
-
-    let stream = fs.createReadStream(filePath);
-
-    stream.on("error", function () {
-      res.writeHead(404);
-      res.end();
-    });
-
-    stream.pipe(res);
   });
 
+  app.use(express.static(path.join(extensionUri, "preview")));
+  app.use(express.static(storageUri.path));
+
   return new Promise<void>((resolve) => {
-    server!.listen(localhostPort, () => {
-      console.log("Started server!");
+    server = app.listen(localhostPort, () => {
+      console.log("Started express server!");
       return resolve();
     });
   });
@@ -69,7 +60,7 @@ export function endServer(): Promise<void> {
         return reject(err);
       }
       server = undefined;
-      console.log("Stopped webpack server!");
+      console.log("Stopped express server!");
       return resolve();
     });
   });
