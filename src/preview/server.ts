@@ -17,12 +17,14 @@ export function startServer(
   app.use(function (req, res, next) {
     console.log(req.url);
 
-    if (req.url && req.url.endsWith(".jsx")) {
+    if (req.url === "/index.js") {
       const result = esbuild.buildSync({
-        entryPoints: [storageUri.path + req.url],
-        nodePaths: [path.resolve(extensionUri, "node_modules")],
+        entryPoints: [path.resolve(extensionUri, "preview", "index.js")],
         bundle: true,
         write: false,
+        loader: {
+          ".js": "jsx",
+        },
       });
 
       const bundledCode = result.outputFiles[0].text;

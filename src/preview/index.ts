@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { disposeAll } from "./utils";
 import { startServer, endServer, localhostPort } from "./server";
-// import { writeEntryFile } from "./writeEntryFile";
+import { writeEntryFile } from "./writeEntryFile";
 
 let webviewPanel: vscode.WebviewPanel | undefined;
 let currentlyOpenedFilePath: string | undefined;
@@ -22,7 +22,7 @@ export async function createOrShow(
 
   vscode.window.showInformationMessage("Starting preview...");
 
-  // writeEntryFile(extensionUri.path);
+  writeEntryFile(extensionUri.path);
 
   await startServer(extensionUri.path, storageUri);
 
