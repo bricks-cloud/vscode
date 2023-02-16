@@ -16,6 +16,18 @@ export async function createOrShow(
     currentlyOpenedFilePath ===
       vscode.window.activeTextEditor?.document.uri.path
   ) {
+    webviewPanel.webview.postMessage("refresh");
+    webviewPanel.reveal(vscode.ViewColumn.Beside);
+    return;
+  }
+
+  if (
+    webviewPanel &&
+    currentlyOpenedFilePath !==
+      vscode.window.activeTextEditor?.document.uri.path
+  ) {
+    writeEntryFile(extensionUri.path);
+    webviewPanel.webview.postMessage("refresh");
     webviewPanel.reveal(vscode.ViewColumn.Beside);
     return;
   }
