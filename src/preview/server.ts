@@ -30,6 +30,9 @@ export function startServer(
           ".png": "dataurl",
         },
         jsx: "automatic",
+        define: {
+          "process.env.NODE_ENV": `"production"`,
+        },
       });
 
       if (result.errors.length > 0) {

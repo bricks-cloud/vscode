@@ -1,8 +1,14 @@
 **/*
 !out/**/*
-!preview/index.html
 !logo.png
 !README.md
+# Needed as the entry point for code preview
+!preview/index.html
+# Styles in webview panel
+!media/**/*
+# Needed for previewing React code
 !node_modules/esbuild-wasm
 !node_modules/react
 !node_modules/react-dom
+!node_modules/loose-envify
+!node_modules/scheduler
