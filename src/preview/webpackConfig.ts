@@ -3,7 +3,7 @@ import * as Webpack from "webpack";
 import * as vscode from "vscode";
 
 export const createWebpackConfig = (
-  extensionPath: string,
+  extensionPath: string
 ): Webpack.Configuration => {
   const activeTextEditor = vscode.window.activeTextEditor;
 
@@ -40,7 +40,8 @@ export const createWebpackConfig = (
           use: {
             loader: "esbuild-loader",
             options: {
-              loader: 'jsx',
+              loader: "jsx",
+              implementation: require("esbuild-wasm"),
             },
           },
         },
