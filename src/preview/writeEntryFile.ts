@@ -26,7 +26,8 @@ function writeEntryFileForReact(extensionPath: string) {
   const activeFileName = componentPath.split("/").pop() as string;
   const componentName = activeFileName.split(".")[0];
 
-  const code = `import { createRoot } from "react-dom/client";
+  const code = `import React from "react";
+import { createRoot } from "react-dom/client";
 import ${componentName} from "${componentPath}";
 
 const root = createRoot(document.getElementById("root"));
@@ -40,7 +41,8 @@ root.render(<${componentName} />);
 function writeEntryFileForHtml(extensionPath: string) {
   const componentPath = vscode.window.activeTextEditor!.document.uri.path;
 
-  const code = `import { createRoot } from "react-dom/client";
+  const code = `import React from "react";
+import { createRoot } from "react-dom/client";
 import htmlString from "${componentPath}";
 
 const root = createRoot(document.getElementById("root"));

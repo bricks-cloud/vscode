@@ -4,24 +4,24 @@ import { Server } from "socket.io";
 import * as Preview from "./preview";
 
 export async function activate(context: vscode.ExtensionContext) {
-  /**
-   * Live preview
-   */
-  context.subscriptions.push(
-    vscode.commands.registerCommand("preview.show", () => {
-      Preview.createOrShow(context.extensionUri);
-    })
-  );
-
-  /**
-   * Initialize Bricks workspace
-   */
   const { storageUri } = context;
 
   if (!storageUri) {
     return;
   }
 
+  /**
+   * Live preview
+   */
+  context.subscriptions.push(
+    vscode.commands.registerCommand("bricksDesignToCode.preview.show", () => {
+      Preview.createOrShow(context.extensionUri, storageUri);
+    })
+  );
+
+  /**
+   * Initialize Bricks workspace
+   */
   const treeDataProvider = new FileSystemProvider(storageUri);
   new FileExplorer(context, treeDataProvider);
 
@@ -71,7 +71,7 @@ export async function activate(context: vscode.ExtensionContext) {
       await vscode.window.showTextDocument(textDocument, vscode.ViewColumn.One);
 
       // show a preview of the main file
-      Preview.createOrShow(context.extensionUri);
+      Preview.createOrShow(context.extensionUri, storageUri);
 
       callback({
         status: "ok",

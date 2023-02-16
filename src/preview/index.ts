@@ -1,18 +1,33 @@
 import * as vscode from "vscode";
 import { disposeAll } from "./utils";
-import { startWebpackServer, stopWebpackServer } from "./webpackServer";
+import { startServer, endServer, localhostPort } from "./server";
 import { writeEntryFile } from "./writeEntryFile";
 
 let webviewPanel: vscode.WebviewPanel | undefined;
 let currentlyOpenedFilePath: string | undefined;
 const disposables: vscode.Disposable[] = [];
 
-export async function createOrShow(extensionUri: vscode.Uri) {
+export async function createOrShow(
+  extensionUri: vscode.Uri,
+  storageUri: vscode.Uri
+) {
   if (
     webviewPanel &&
     currentlyOpenedFilePath ===
       vscode.window.activeTextEditor?.document.uri.path
   ) {
+    webviewPanel.webview.postMessage("refresh");
+    webviewPanel.reveal(vscode.ViewColumn.Beside);
+    return;
+  }
+
+  if (
+    webviewPanel &&
+    currentlyOpenedFilePath !==
+      vscode.window.activeTextEditor?.document.uri.path
+  ) {
+    writeEntryFile(extensionUri.path);
+    webviewPanel.webview.postMessage("refresh");
     webviewPanel.reveal(vscode.ViewColumn.Beside);
     return;
   }
@@ -21,7 +36,7 @@ export async function createOrShow(extensionUri: vscode.Uri) {
 
   writeEntryFile(extensionUri.path);
 
-  await startWebpackServer(extensionUri.path);
+  await startServer(extensionUri.path, storageUri);
 
   setupWebviewPanel(extensionUri);
 
@@ -64,16 +79,42 @@ function setupWebviewPanel(extensionUri: vscode.Uri) {
       <title>React Component Preview</title>
     </head>
     <body>
-      <iframe src="http://localhost:9132/" sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
+      <iframe id="preview" src="http://localhost:${localhostPort}/" sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
+      <script>
+        window.addEventListener('message', event => {
+            const message = event.data;
+            if(message === "refresh") {
+              document.getElementById('preview').src += '';
+            }
+        });
+      </script>
     </body>
     </html>`;
+
+  /**
+   * Reload on save
+   */
+  const supportedLanguages = ["typescriptreact", "javascriptreact", "html"];
+  vscode.workspace.onDidSaveTextDocument(
+    (document) => {
+      if (
+        supportedLanguages.includes(document.languageId) &&
+        document.uri.scheme === "file"
+      ) {
+        webviewPanel!.webview.postMessage("refresh");
+      }
+    },
+    null,
+    disposables
+  );
 
   /**
    * Clean up when the webview panel is closed
    */
   webviewPanel.onDidDispose(
     async () => {
-      await stopWebpackServer();
+      console.log("Webview is disposed");
+      await endServer();
       disposeAll(disposables);
       webviewPanel = undefined;
     },
