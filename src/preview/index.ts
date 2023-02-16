@@ -76,6 +76,7 @@ function setupWebviewPanel(extensionUri: vscode.Uri) {
    */
   webviewPanel.onDidDispose(
     async () => {
+      console.log("Webview is disposed");
       await endServer();
       disposeAll(disposables);
       webviewPanel = undefined;

@@ -25,6 +25,7 @@ export function startServer(
         write: false,
         loader: {
           ".js": "jsx",
+          ".html": "text",
         },
         jsx: "automatic",
       });
