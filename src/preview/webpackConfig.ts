@@ -3,14 +3,13 @@ import * as Webpack from "webpack";
 import * as vscode from "vscode";
 
 export const createWebpackConfig = (
-  extensionPath: string
+  extensionPath: string,
 ): Webpack.Configuration => {
   const activeTextEditor = vscode.window.activeTextEditor;
 
   if (!activeTextEditor) {
     throw new Error("No file is currently opened!");
   }
-
   return {
     mode: "development",
     context: path.resolve(extensionPath, "preview"),
@@ -33,41 +32,29 @@ export const createWebpackConfig = (
       rules: [
         {
           test: /\.(html)$/,
-          use: [require.resolve("html-loader")],
+          use: ["html-loader"],
         },
         {
           test: /\.(tsx|ts|jsx|js)$/,
           exclude: /node_modules/,
           use: {
-            loader: require.resolve("babel-loader"),
+            loader: "esbuild-loader",
             options: {
-              presets: [
-                require.resolve("@babel/preset-env"),
-                require.resolve("@babel/preset-react"),
-                require.resolve("@babel/preset-typescript"),
-              ],
+              loader: 'jsx',
             },
           },
         },
         {
           test: /\.css$/,
-          use: [require.resolve("style-loader"), require.resolve("css-loader")],
+          use: ["style-loader", "css-loader"],
         },
         {
           test: /\.(png|jpe?g|gif|svg)$/i,
-          use: [
-            {
-              loader: require.resolve("file-loader"),
-            },
-          ],
+          use: ["file-loader"],
         },
         {
           test: /\.(ttf|eot|woff|woff2)$/,
-          use: [
-            {
-              loader: require.resolve("file-loader"),
-            },
-          ],
+          use: ["file-loader"],
         },
       ],
     },
