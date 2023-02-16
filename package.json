@@ -1,8 +1,13 @@
 {
   "name": "d2c-vscode",
   "publisher": "bricks",
-  "displayName": "d2c-vscode",
-  "description": "Design to code tool",
+  "icon": "assets/bricks-logo.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bricks-cloud/d2c-vscode"
+  },
+  "displayName": "Bricks Design to Code",
+  "description": "Bricks is Github copilot for UI engineering. It is built by fullstack engineers for fullstack engineers.",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.74.0"
