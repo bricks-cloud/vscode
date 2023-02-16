@@ -1,6 +1,6 @@
 **/*
 !out/**/*
-!logo.png
+!assets/bricks-logo.png
 !README.md
 # Needed as the entry point for code preview
 !preview/index.html
