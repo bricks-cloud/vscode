@@ -67,9 +67,34 @@ function setupWebviewPanel(extensionUri: vscode.Uri) {
       <title>React Component Preview</title>
     </head>
     <body>
-      <iframe src="http://localhost:${localhostPort}/" sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
+      <iframe id="preview" src="http://localhost:${localhostPort}/" sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
+      <script>
+        window.addEventListener('message', event => {
+            const message = event.data;
+            if(message === "refresh") {
+              document.getElementById('preview').src += '';
+            }
+        });
+      </script>
     </body>
     </html>`;
+
+  /**
+   * Reload on save
+   */
+  const supportedLanguages = ["typescriptreact", "javascriptreact", "html"];
+  vscode.workspace.onDidSaveTextDocument(
+    (document) => {
+      if (
+        supportedLanguages.includes(document.languageId) &&
+        document.uri.scheme === "file"
+      ) {
+        webviewPanel!.webview.postMessage("refresh");
+      }
+    },
+    null,
+    disposables
+  );
 
   /**
    * Clean up when the webview panel is closed

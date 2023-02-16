@@ -26,18 +26,17 @@ export function startServer(
         loader: {
           ".js": "jsx",
           ".html": "text",
+          ".svg": "dataurl",
         },
         jsx: "automatic",
       });
 
       const bundledCode = result.outputFiles[0].text;
 
-      res.type("js");
-
-      return res.send(bundledCode);
-    } else {
-      next();
+      return res.type("js").send(bundledCode);
     }
+
+    next();
   });
 
   app.use(express.static(path.join(extensionUri, "preview")));
