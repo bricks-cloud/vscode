@@ -27,6 +27,7 @@ export function startServer(
           ".js": "jsx",
           ".html": "text",
           ".svg": "dataurl",
+          ".png": "dataurl",
         },
         jsx: "automatic",
       });
