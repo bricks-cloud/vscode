@@ -32,6 +32,10 @@ export function startServer(
         jsx: "automatic",
       });
 
+      if (result.errors.length > 0) {
+        return res.status(500).send(result.errors);
+      }
+
       const bundledCode = result.outputFiles[0].text;
 
       return res.type("js").send(bundledCode);
