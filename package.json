@@ -47,7 +47,7 @@
         "title": "Start handling Uris"
       },
       {
-        "command": "preview.show",
+        "command": "bricksDesignToCode.preview.show",
         "title": "Show preview of currently opened file"
       },
       {

@@ -14,7 +14,7 @@ export async function activate(context: vscode.ExtensionContext) {
    * Live preview
    */
   context.subscriptions.push(
-    vscode.commands.registerCommand("preview.show", () => {
+    vscode.commands.registerCommand("bricksDesignToCode.preview.show", () => {
       Preview.createOrShow(context.extensionUri, storageUri);
     })
   );
