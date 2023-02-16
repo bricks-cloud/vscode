@@ -1696,6 +1696,11 @@ esbuild-loader@^3.0.1:
     loader-utils "^2.0.4"
     webpack-sources "^1.4.3"
 
+esbuild-wasm@^0.17.8:
+  version "0.17.8"
+  resolved "https://registry.yarnpkg.com/esbuild-wasm/-/esbuild-wasm-0.17.8.tgz#c2348306430c27613ee3cc9a955cdd54df29137a"
+  integrity sha512-zCmpxv95E0FuCmvdw1K836UHnj4EdiQnFfjTby35y3LAjRPtXMj3sbHDRHjbD8Mqg5lTwq3knacr/1qIFU51CQ==
+
 esbuild@^0.17.6:
   version "0.17.8"
   resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.17.8.tgz#f7f799abc7cdce3f0f2e3e0c01f120d4d55193b4"
