@@ -20,11 +20,13 @@ export function startServer(
     if (req.url === "/index.js") {
       const result = esbuild.buildSync({
         entryPoints: [path.resolve(extensionUri, "preview", "index.js")],
+        nodePaths: [path.resolve(extensionUri, "node_modules")],
         bundle: true,
         write: false,
         loader: {
           ".js": "jsx",
         },
+        jsx: "automatic",
       });
 
       const bundledCode = result.outputFiles[0].text;
