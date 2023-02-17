@@ -2,7 +2,7 @@ const { build } = require("esbuild");
 
 build({
   entryPoints: ["./src/extension.ts"],
-  minify: false,
+  minify: true,
   bundle: true,
   outdir: "./out",
   external: ["vscode", "esbuild-wasm"],

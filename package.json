@@ -62,7 +62,7 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "node esbuild.js",
+    "vscode:prepublish": "node esbuild.prod.js",
     "watch": "node esbuild.dev.js",
     "dev:install": "vsce package && code --install-extension d2c-vscode-0.0.2.vsix --force"
   },
