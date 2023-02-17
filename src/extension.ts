@@ -28,7 +28,7 @@ export async function activate(context: vscode.ExtensionContext) {
   /**
    * Initialize socket server
    */
-  const io = new Server(3000, {
+  const io = new Server(32044, {
     maxHttpBufferSize: 1e8,
     cors: {
       origin: "*",
