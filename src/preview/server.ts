@@ -1,17 +1,19 @@
-// Credits: https://github.com/microsoft/vscode-livepreview
 import * as vscode from "vscode";
 import type http from "http";
 import path from "path";
 import express from "express";
 import * as esbuild from "esbuild-wasm";
+import getPort, { portNumbers } from "get-port";
 
-export const localhostPort = 4000;
+let previewServerPort: number | undefined;
 let server: http.Server | undefined;
 
-export function startServer(
+export async function startServer(
   extensionUri: string,
   storageUri: vscode.Uri
 ): Promise<void> {
+  previewServerPort = await getPort({ port: portNumbers(4000, 5000) });
+
   const app = express();
 
   app.use(function (req, res, next) {
@@ -51,7 +53,7 @@ export function startServer(
   app.use(express.static(storageUri.path));
 
   return new Promise<void>((resolve) => {
-    server = app.listen(localhostPort, () => {
+    server = app.listen(previewServerPort, () => {
       console.log("Started express server!");
       return resolve();
     });
@@ -74,4 +76,8 @@ export function endServer(): Promise<void> {
       return resolve();
     });
   });
+}
+
+export function getServerPort() {
+  return previewServerPort;
 }

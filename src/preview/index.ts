@@ -1,32 +1,24 @@
 import * as vscode from "vscode";
 import { disposeAll } from "./utils";
-import { startServer, endServer, localhostPort } from "./server";
+import { startServer, endServer, getServerPort } from "./server";
 import { writeEntryFile } from "./writeEntryFile";
 
 let webviewPanel: vscode.WebviewPanel | undefined;
-let currentlyOpenedFilePath: string | undefined;
+let currentOpenFilePath: string | undefined;
 const disposables: vscode.Disposable[] = [];
 
 export async function createOrShow(
   extensionUri: vscode.Uri,
   storageUri: vscode.Uri
 ) {
-  if (
-    webviewPanel &&
-    currentlyOpenedFilePath ===
-      vscode.window.activeTextEditor?.document.uri.path
-  ) {
-    webviewPanel.webview.postMessage("refresh");
-    webviewPanel.reveal(vscode.ViewColumn.Beside);
-    return;
+  const openFilePathChanged =
+    currentOpenFilePath !== vscode.window.activeTextEditor?.document.uri.path;
+
+  if (openFilePathChanged) {
+    writeEntryFile(extensionUri.path);
   }
 
-  if (
-    webviewPanel &&
-    currentlyOpenedFilePath !==
-      vscode.window.activeTextEditor?.document.uri.path
-  ) {
-    writeEntryFile(extensionUri.path);
+  if (webviewPanel) {
     webviewPanel.webview.postMessage("refresh");
     webviewPanel.reveal(vscode.ViewColumn.Beside);
     return;
@@ -34,13 +26,11 @@ export async function createOrShow(
 
   vscode.window.showInformationMessage("Starting preview...");
 
-  writeEntryFile(extensionUri.path);
-
   await startServer(extensionUri.path, storageUri);
 
   setupWebviewPanel(extensionUri);
 
-  currentlyOpenedFilePath = vscode.window.activeTextEditor?.document.uri.path;
+  currentOpenFilePath = vscode.window.activeTextEditor?.document.uri.path;
 }
 
 function setupWebviewPanel(extensionUri: vscode.Uri) {
@@ -79,7 +69,7 @@ function setupWebviewPanel(extensionUri: vscode.Uri) {
       <title>React Component Preview</title>
     </head>
     <body>
-      <iframe id="preview" src="http://localhost:${localhostPort}/" sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
+      <iframe id="preview" src="http://localhost:${getServerPort()}/" sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
       <script>
         window.addEventListener('message', event => {
             const message = event.data;
