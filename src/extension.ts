@@ -2,11 +2,15 @@ import * as vscode from "vscode";
 import { File, FileExplorer, FileSystemProvider } from "./fileExplorer";
 import { Server } from "socket.io";
 import * as Preview from "./preview";
+import { createServer } from "http";
 
 export async function activate(context: vscode.ExtensionContext) {
   const { storageUri } = context;
 
   if (!storageUri) {
+    vscode.window.showInformationMessage(
+      "Open a workspace to start using Bricks Design to Code Tool"
+    );
     return;
   }
 
@@ -28,7 +32,8 @@ export async function activate(context: vscode.ExtensionContext) {
   /**
    * Initialize socket server
    */
-  const io = new Server(32044, {
+  const httpServer = createServer();
+  const io = new Server(httpServer, {
     maxHttpBufferSize: 1e8,
     cors: {
       origin: "*",
@@ -77,6 +82,11 @@ export async function activate(context: vscode.ExtensionContext) {
         status: "ok",
       });
     });
+  });
+
+  const port = 32044;
+  httpServer.listen({ port }, () => {
+    console.log(`Started websocket server on port ${port}...`);
   });
 }
 

@@ -18,14 +18,6 @@ export class FileExplorer {
   ) {
     this.bricksFileSystem = bricksFileSystem;
 
-    const { storageUri } = context;
-    if (!storageUri?.toString()) {
-      vscode.window.showInformationMessage(
-        "Open a workspace to start using Bricks Design to Code Tool"
-      );
-      return;
-    }
-
     context.subscriptions.push(
       vscode.window.createTreeView("bricksWorkspace", {
         treeDataProvider: this.bricksFileSystem,

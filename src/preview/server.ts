@@ -9,8 +9,8 @@ let previewServerPort: number | undefined;
 let server: http.Server | undefined;
 
 export async function startServer(
-  extensionUri: string,
-  storageUri: vscode.Uri
+  extensionFsPath: string,
+  storageFsPath: string
 ): Promise<void> {
   previewServerPort = await getPort({ port: portNumbers(4000, 5000) });
 
@@ -21,8 +21,8 @@ export async function startServer(
 
     if (req.url === "/index.js") {
       const result = esbuild.buildSync({
-        entryPoints: [path.resolve(extensionUri, "preview", "index.js")],
-        nodePaths: [path.resolve(extensionUri, "node_modules")],
+        entryPoints: [path.resolve(extensionFsPath, "preview", "index.js")],
+        nodePaths: [path.resolve(extensionFsPath, "node_modules")],
         bundle: true,
         write: false,
         loader: {
@@ -49,8 +49,8 @@ export async function startServer(
     next();
   });
 
-  app.use(express.static(path.join(extensionUri, "preview")));
-  app.use(express.static(storageUri.path));
+  app.use(express.static(path.resolve(extensionFsPath, "preview")));
+  app.use(express.static(storageFsPath));
 
   return new Promise<void>((resolve) => {
     server = app.listen(previewServerPort, () => {

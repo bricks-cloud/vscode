@@ -2,16 +2,16 @@ import * as vscode from "vscode";
 import fs from "fs";
 import path from "path";
 
-export function writeEntryFile(extensionPath: string) {
+export function writeEntryFile(extensionFsPath: string) {
   const languageId = vscode.window.activeTextEditor?.document.languageId || "";
 
   switch (languageId) {
     case "typescriptreact":
     case "javascriptreact":
-      writeEntryFileForReact(extensionPath);
+      writeEntryFileForReact(extensionFsPath);
       break;
     case "html":
-      writeEntryFileForHtml(extensionPath);
+      writeEntryFileForHtml(extensionFsPath);
       break;
     default:
       vscode.window.showInformationMessage(
@@ -22,13 +22,19 @@ export function writeEntryFile(extensionPath: string) {
 }
 
 function writeEntryFileForReact(extensionPath: string) {
-  const componentPath = vscode.window.activeTextEditor!.document.uri.path;
-  const activeFileName = componentPath.split("/").pop() as string;
+  let activeDocumentPath = vscode.window.activeTextEditor!.document.uri.path;
+
+  if (activeDocumentPath.startsWith("/c:")) {
+    // windows file path
+    activeDocumentPath = activeDocumentPath.slice(1).replace(/\//g, "\\\\");
+  }
+
+  const activeFileName = path.basename(activeDocumentPath);
   const componentName = activeFileName.split(".")[0];
 
   const code = `import React from "react";
 import { createRoot } from "react-dom/client";
-import ${componentName} from "${componentPath}";
+import ${componentName} from "${activeDocumentPath}";
 
 const root = createRoot(document.getElementById("root"));
 
@@ -39,11 +45,16 @@ root.render(<${componentName} />);
 }
 
 function writeEntryFileForHtml(extensionPath: string) {
-  const componentPath = vscode.window.activeTextEditor!.document.uri.path;
+  let activeDocumentPath = vscode.window.activeTextEditor!.document.uri.path;
+
+  if (activeDocumentPath.startsWith("/c:")) {
+    // windows file path
+    activeDocumentPath = activeDocumentPath.slice(1).replace(/\//g, "\\\\");
+  }
 
   const code = `import React from "react";
 import { createRoot } from "react-dom/client";
-import htmlString from "${componentPath}";
+import htmlString from "${activeDocumentPath}";
 
 const root = createRoot(document.getElementById("root"));
 

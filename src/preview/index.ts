@@ -15,7 +15,7 @@ export async function createOrShow(
     currentOpenFilePath !== vscode.window.activeTextEditor?.document.uri.path;
 
   if (openFilePathChanged) {
-    writeEntryFile(extensionUri.path);
+    writeEntryFile(extensionUri.fsPath);
   }
 
   if (webviewPanel) {
@@ -26,7 +26,7 @@ export async function createOrShow(
 
   vscode.window.showInformationMessage("Starting preview...");
 
-  await startServer(extensionUri.path, storageUri);
+  await startServer(extensionUri.fsPath, storageUri.fsPath);
 
   setupWebviewPanel(extensionUri);
 
