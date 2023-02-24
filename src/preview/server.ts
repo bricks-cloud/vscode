@@ -39,8 +39,8 @@ function requireUncached(module: string) {
 }
 
 export async function startServer(
-  extensionUri: string,
-  storageUri: vscode.Uri
+  extensionFsPath: string,
+  storageFsPath: string
 ): Promise<void> {
   previewServerPort = await getPort({ port: portNumbers(4000, 5000) });
 
@@ -50,9 +50,8 @@ export async function startServer(
 
     if (req.url === "/index.js") {
       let esbuildConfig: esbuild.BuildOptions = {
-        entryPoints: [path.resolve(extensionUri, "preview", "index.js"), path.resolve(storageUri.path, "style.css")],
-        nodePaths: [path.resolve(extensionUri, "node_modules")],
-        outdir: path.resolve(storageUri.path, "build"),
+        entryPoints: [path.resolve(extensionFsPath, "preview", "index.js")],
+        nodePaths: [path.resolve(extensionFsPath, "node_modules")],
         bundle: true,
         write: false,
         loader: {
@@ -68,14 +67,14 @@ export async function startServer(
       };
 
       // add plugin for postcss when tailwindcss is selected
-      const tWCFilePath = path.resolve(storageUri.path, "tailwind.config.js");
+      const tWCFilePath = path.resolve(storageFsPath, "tailwind.config.js");
       if (fs.existsSync(tWCFilePath)) {
         let tWCConfig = requireUncached(tWCFilePath);
 
         tWCConfig.content = tWCConfig.content.map((originalPath: string) => {
           const parts = originalPath.split("/");
           const matchedFileFormat = parts[parts.length - 1];
-          return path.resolve(storageUri.path, matchedFileFormat);
+          return path.resolve(storageFsPath, matchedFileFormat);
         });
 
         esbuildConfig.plugins = [
@@ -108,8 +107,8 @@ export async function startServer(
     next();
   });
 
-  app.use(express.static(path.join(extensionUri, "preview")));
-  app.use(express.static(storageUri.path));
+  app.use(express.static(path.resolve(extensionFsPath, "preview")));
+  app.use(express.static(storageFsPath));
 
   return new Promise<void>((resolve) => {
     server = app.listen(previewServerPort, () => {

@@ -13,11 +13,14 @@ Select figma components and start seeing generated code in VSCode.
 Please install Bricks' [Figma plugin](https://www.figma.com/community/plugin/1178847414663679049/Bricks-Design-to-Code-Tool) first before using this plugin.
 
 ## Known Issues
+
 ### VSCode Extension Issues
-* VScode extension works only in one VSCode windows
+
+- VScode extension works only in one VSCode windows
 
 ### Figma Extension Issues
-* Auto layout is required in the Figma design for more accurate code output in terms of grouping
+
+- Auto layout is required in the Figma design for more accurate code output in terms of grouping
 
 ## Release Notes
 
