@@ -59,6 +59,12 @@ function setupWebviewPanel(extensionUri: vscode.Uri) {
     vscode.Uri.joinPath(extensionUri, "media", "vscode.css")
   );
 
+  // const stylesTWCUri = webviewPanel.webview.asWebviewUri(
+  //   vscode.Uri.joinPath(extensionUri, "media", "style.css")
+  // );
+
+  // console.log(stylesTWCUri);
+
   webviewPanel.webview.html = `<!DOCTYPE html>
     <html lang="en">
     <head>

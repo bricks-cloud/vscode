@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { File, FileExplorer, FileSystemProvider } from "./fileExplorer";
 import { Server } from "socket.io";
 import * as Preview from "./preview";
+import fs from "fs";
 
 export async function activate(context: vscode.ExtensionContext) {
   const { storageUri } = context;
@@ -57,8 +58,6 @@ export async function activate(context: vscode.ExtensionContext) {
         })
       );
 
-      treeDataProvider.refresh();
-
       // open the main file in the editor
       const mainFilePath = files.find((file) =>
         file.path.includes("GeneratedComponent")
@@ -73,6 +72,8 @@ export async function activate(context: vscode.ExtensionContext) {
       // show a preview of the main file
       Preview.createOrShow(context.extensionUri, storageUri);
 
+      treeDataProvider.refresh();
+
       callback({
         status: "ok",
       });
@@ -80,4 +81,4 @@ export async function activate(context: vscode.ExtensionContext) {
   });
 }
 
-export async function deactivate() {}
+export async function deactivate() { }

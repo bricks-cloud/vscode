@@ -5,7 +5,7 @@ build({
   minify: true,
   bundle: true,
   outdir: "./out",
-  external: ["vscode", "esbuild-wasm"],
+  external: ["vscode", "esbuild-wasm", "tailwindcss"],
   platform: "node",
 }).catch((err) => {
   process.stderr.write(err.stderr);

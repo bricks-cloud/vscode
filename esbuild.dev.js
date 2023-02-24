@@ -36,7 +36,7 @@ context({
   minify: false,
   bundle: true,
   outdir: "./out",
-  external: ["vscode", "esbuild-wasm"],
+  external: ["vscode", "esbuild-wasm", "tailwindcss"],
   platform: "node",
   plugins: [LoggingPlugin],
 })
