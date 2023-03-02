@@ -8,7 +8,7 @@
   },
   "displayName": "Bricks Design to Code",
   "description": "Bricks is Github copilot for UI engineering. It is built by fullstack engineers for fullstack engineers.",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "engines": {
     "vscode": "^1.74.0"
   },
