@@ -140,9 +140,16 @@ export async function activate(context: vscode.ExtensionContext) {
       return;
     }
 
+    if (workspaceState.get("bricksActivated")) {
+      vscode.window.showInformationMessage(
+        "Bricks is already activated"
+      );
+
+      return;
+    }
+
     await createPlaceHolderFile("Select Components Using the Figma Plugin to get started");
     treeDataProvider.refresh();
-
 
     /**
      * Start the http server
@@ -201,6 +208,10 @@ export async function activate(context: vscode.ExtensionContext) {
         });
       });
     });
+
+    vscode.window.showInformationMessage(
+      "Bricks has been activated"
+    );
   });
 
   /**
@@ -222,6 +233,10 @@ export async function activate(context: vscode.ExtensionContext) {
       await globalState.update("bricksGloballyActivated", false);
       await workspaceState.update("bricksActivated", false);
     }
+
+    vscode.window.showInformationMessage(
+      "Bricks has been shut down"
+    );
   });
 }
 

@@ -12,11 +12,20 @@ Select figma components and start seeing generated code in VSCode.
 
 Please install Bricks' [Figma plugin](https://www.figma.com/community/plugin/1178847414663679049/Bricks-Design-to-Code-Tool) first before using this plugin.
 
-## Known Issues
+## How to use Bricks
+
+- Open up VSCode command bar(Command + Shift + P) and find Activate Bricks command to start up the VSCode plugin.
+
+
+## How to use Bricks in a window
+
+- If you want to activate Bricks in a particular window, first use Shut Down Bricks command in the command bar(Command + Shift + P) to close the running Bricks instance before activating the Plugin.
+
+### How to fix common issues
+- After installing or updating Bricks, use Developer:Reload Window in the command bar to fix any anomalies.
+- If issues persist, use Reset Bricks in the command bar to reset all Bricks settings in each window.
 
 ### VSCode Extension Issues
-
-- VScode extension works only in one VSCode windows
 
 ### Figma Extension Issues
 
