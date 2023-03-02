@@ -14,25 +14,6 @@ import fs from "fs";
 let previewServerPort: number | undefined;
 let server: http.Server | undefined;
 
-interface arguments {
-  path: string
-}
-
-const styleLoader = {
-  name: 'inline-style',
-  setup(build: esbuild.PluginBuild) {
-    var fs = require('fs');
-    var template = (css: string) =>
-      `typeof document<'u'&&` +
-      `document.head.appendChild(document.createElement('style'))` +
-      `.appendChild(document.createTextNode(${JSON.stringify(css)}))`;
-    build.onLoad({ filter: /\.css$/ }, async (args: arguments) => {
-      let css = await fs.promises.readFile(args.path, 'utf8');
-      return { contents: template(css) };
-    });
-  }
-};
-
 function requireUncached(module: string) {
   delete require.cache[require.resolve(module)];
   return require(module);
@@ -47,7 +28,6 @@ export async function startServer(
   const app = express();
 
   app.use(async function (req, res, next) {
-
     if (req.url === "/index.js") {
       let esbuildConfig: esbuild.BuildOptions = {
         entryPoints: [path.resolve(extensionFsPath, "preview", "index.js")],

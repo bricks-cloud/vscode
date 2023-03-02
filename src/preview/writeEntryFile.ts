@@ -2,16 +2,17 @@ import * as vscode from "vscode";
 import fs from "fs";
 import path from "path";
 
-export function writeEntryFile(extensionFsPath: string) {
-  const languageId = vscode.window.activeTextEditor?.document.languageId || "";
+export function writeEntryFile(extensionFsPath: string, mainFilePath: string) {
+  const parts = mainFilePath?.split('.');
+  const fileExtension = Array.isArray(parts) ? parts[parts.length - 1] : "";
 
-  switch (languageId) {
-    case "typescriptreact":
-    case "javascriptreact":
-      writeEntryFileForReact(extensionFsPath);
+  switch (fileExtension) {
+    case "tsx":
+    case "jsx":
+      writeEntryFileForReact(extensionFsPath, mainFilePath);
       break;
     case "html":
-      writeEntryFileForHtml(extensionFsPath);
+      writeEntryFileForHtml(extensionFsPath, mainFilePath);
       break;
     default:
       vscode.window.showInformationMessage(
@@ -21,8 +22,7 @@ export function writeEntryFile(extensionFsPath: string) {
   }
 }
 
-function writeEntryFileForReact(extensionPath: string) {
-  let activeDocumentPath = vscode.window.activeTextEditor!.document.uri.path;
+function writeEntryFileForReact(extensionPath: string, activeDocumentPath: string) {
 
   if (activeDocumentPath.startsWith("/c:")) {
     // windows file path
@@ -44,9 +44,7 @@ root.render(<${componentName} />);
   fs.writeFileSync(path.resolve(extensionPath, "preview", "index.js"), code);
 }
 
-function writeEntryFileForHtml(extensionPath: string) {
-  let activeDocumentPath = vscode.window.activeTextEditor!.document.uri.path;
-
+function writeEntryFileForHtml(extensionPath: string, activeDocumentPath: string) {
   if (activeDocumentPath.startsWith("/c:")) {
     // windows file path
     activeDocumentPath = activeDocumentPath.slice(1).replace(/\//g, "\\\\");
