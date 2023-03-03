@@ -22,8 +22,58 @@ export function writeEntryFile(extensionFsPath: string, mainFilePath: string) {
   }
 }
 
-function writeEntryFileForReact(extensionPath: string, activeDocumentPath: string) {
+const entryFileTemplate = (componentName: string, activeDocumentPath: string, format: string) => {
+  const htmlComponent = `<div dangerouslySetInnerHTML={{ __html: ${componentName} }}></div>`;
+  const reactComponent = `<${componentName} />`;
 
+  const splitedPath = activeDocumentPath.split("/");
+  splitedPath[splitedPath.length - 1] = "style.css";
+  const cssFilePath = splitedPath.join("/");
+
+  let importCSSFile = false;
+
+  try {
+    if (fs.existsSync(cssFilePath) && format === "html") {
+      importCSSFile = true;
+    }
+  } catch (err) { }
+
+  const cssImportStatement = `import "${splitedPath.join("/")}";`;
+
+  return `import React, { useState } from "react";
+  import { createRoot } from "react-dom/client";
+  import ${componentName} from "${activeDocumentPath}";
+  ${importCSSFile ? cssImportStatement : ""}
+  
+  const App = () => {
+    const [checked, setChecked] = useState(true);
+  
+    const handleToggle = (e) => {
+      setChecked(!e.target.checked)
+      if (checked) {
+        document.body.style.backgroundColor = "white"
+      } else {
+        document.body.style.backgroundColor = "black"
+      }
+    };
+  
+    return (
+      <div>
+        ${format === "html" ? htmlComponent : reactComponent}
+        <div className="toggle">
+          <input onChange={handleToggle} type="checkbox" id="switch" /><label for="switch">Toggle</label>
+        </div>
+      </div>
+    );
+  }
+  
+  const root = createRoot(document.getElementById("root"));
+  
+  root.render(<App />);
+  `;
+};
+
+function writeEntryFileForReact(extensionPath: string, activeDocumentPath: string) {
   if (activeDocumentPath.startsWith("/c:")) {
     // windows file path
     activeDocumentPath = activeDocumentPath.slice(1).replace(/\//g, "\\\\");
@@ -32,16 +82,7 @@ function writeEntryFileForReact(extensionPath: string, activeDocumentPath: strin
   const activeFileName = path.basename(activeDocumentPath);
   const componentName = activeFileName.split(".")[0];
 
-  const code = `import React from "react";
-import { createRoot } from "react-dom/client";
-import ${componentName} from "${activeDocumentPath}";
-
-const root = createRoot(document.getElementById("root"));
-
-root.render(<${componentName} />);
-`;
-
-  fs.writeFileSync(path.resolve(extensionPath, "preview", "index.js"), code);
+  fs.writeFileSync(path.resolve(extensionPath, "preview", "index.js"), entryFileTemplate(componentName, activeDocumentPath, "react"));
 }
 
 function writeEntryFileForHtml(extensionPath: string, activeDocumentPath: string) {
@@ -50,14 +91,5 @@ function writeEntryFileForHtml(extensionPath: string, activeDocumentPath: string
     activeDocumentPath = activeDocumentPath.slice(1).replace(/\//g, "\\\\");
   }
 
-  const code = `import React from "react";
-import { createRoot } from "react-dom/client";
-import htmlString from "${activeDocumentPath}";
-
-const root = createRoot(document.getElementById("root"));
-
-root.render(<div dangerouslySetInnerHTML={{ __html: htmlString }}></div>)
-`;
-
-  fs.writeFileSync(path.resolve(extensionPath, "preview", "index.js"), code);
+  fs.writeFileSync(path.resolve(extensionPath, "preview", "index.js"), entryFileTemplate("htmlstring", activeDocumentPath, "html"));
 }
