@@ -4,11 +4,11 @@ import path from "path";
 import express from "express";
 import * as esbuild from "esbuild-wasm";
 import getPort, { portNumbers } from "get-port";
-import postcss from 'postcss';
-import autoprefixer from 'autoprefixer';
-import postcssPresetEnv from 'postcss-preset-env';
-import tailwindcss from 'tailwindcss';
-import { sassPlugin } from 'esbuild-sass-plugin';
+import postcss from "postcss";
+import autoprefixer from "autoprefixer";
+import postcssPresetEnv from "postcss-preset-env";
+import tailwindcss from "tailwindcss";
+import { sassPlugin } from "esbuild-sass-plugin";
 import fs from "fs";
 
 let previewServerPort: number | undefined;
@@ -60,7 +60,11 @@ export async function startServer(
         esbuildConfig.plugins = [
           sassPlugin({
             async transform(source: string, resolveDir: string) {
-              const { css } = await postcss([tailwindcss(tWCConfig), autoprefixer, postcssPresetEnv]).process(source, { from: undefined });
+              const { css } = await postcss([
+                tailwindcss(tWCConfig),
+                autoprefixer,
+                postcssPresetEnv,
+              ]).process(source, { from: undefined });
               return css;
             },
             type: "style",
@@ -68,7 +72,6 @@ export async function startServer(
           }),
         ];
       }
-
 
       const result = await esbuild.build(esbuildConfig);
 
@@ -78,7 +81,6 @@ export async function startServer(
 
       if (result.outputFiles) {
         return res.type("js").send(result.outputFiles[0].text);
-
       }
 
       return res.type("js").send("");

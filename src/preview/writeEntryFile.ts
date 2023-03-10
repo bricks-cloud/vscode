@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 
 export function writeEntryFile(extensionFsPath: string, mainFilePath: string) {
-  const parts = mainFilePath?.split('.');
+  const parts = mainFilePath?.split(".");
   const fileExtension = Array.isArray(parts) ? parts[parts.length - 1] : "";
 
   switch (fileExtension) {
@@ -22,7 +22,11 @@ export function writeEntryFile(extensionFsPath: string, mainFilePath: string) {
   }
 }
 
-const entryFileTemplate = (componentName: string, activeDocumentPath: string, format: string) => {
+const entryFileTemplate = (
+  componentName: string,
+  activeDocumentPath: string,
+  format: string
+) => {
   const htmlComponent = `<div dangerouslySetInnerHTML={{ __html: ${componentName} }}></div>`;
   const reactComponent = `<${componentName} />`;
 
@@ -36,7 +40,7 @@ const entryFileTemplate = (componentName: string, activeDocumentPath: string, fo
     if (fs.existsSync(cssFilePath) && format === "html") {
       importCSSFile = true;
     }
-  } catch (err) { }
+  } catch (err) {}
 
   const cssImportStatement = `import "${splitedPath.join("/")}";`;
 
@@ -73,7 +77,10 @@ const entryFileTemplate = (componentName: string, activeDocumentPath: string, fo
   `;
 };
 
-function writeEntryFileForReact(extensionPath: string, activeDocumentPath: string) {
+function writeEntryFileForReact(
+  extensionPath: string,
+  activeDocumentPath: string
+) {
   if (activeDocumentPath.startsWith("/c:")) {
     // windows file path
     activeDocumentPath = activeDocumentPath.slice(1).replace(/\//g, "\\\\");
@@ -82,14 +89,23 @@ function writeEntryFileForReact(extensionPath: string, activeDocumentPath: strin
   const activeFileName = path.basename(activeDocumentPath);
   const componentName = activeFileName.split(".")[0];
 
-  fs.writeFileSync(path.resolve(extensionPath, "preview", "index.js"), entryFileTemplate(componentName, activeDocumentPath, "react"));
+  fs.writeFileSync(
+    path.resolve(extensionPath, "preview", "index.js"),
+    entryFileTemplate(componentName, activeDocumentPath, "react")
+  );
 }
 
-function writeEntryFileForHtml(extensionPath: string, activeDocumentPath: string) {
+function writeEntryFileForHtml(
+  extensionPath: string,
+  activeDocumentPath: string
+) {
   if (activeDocumentPath.startsWith("/c:")) {
     // windows file path
     activeDocumentPath = activeDocumentPath.slice(1).replace(/\//g, "\\\\");
   }
 
-  fs.writeFileSync(path.resolve(extensionPath, "preview", "index.js"), entryFileTemplate("htmlstring", activeDocumentPath, "html"));
+  fs.writeFileSync(
+    path.resolve(extensionPath, "preview", "index.js"),
+    entryFileTemplate("htmlstring", activeDocumentPath, "html")
+  );
 }

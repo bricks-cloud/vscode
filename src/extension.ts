@@ -50,23 +50,31 @@ export async function activate(context: vscode.ExtensionContext) {
   /**
    * Correct set the flags when the plug in is shut down but the flags indicate otherwise
    */
-  if (globalState.get("bricksWorkspace") === vscode.workspace.name && !workspaceState.get("bricksActivated")) {
+  if (
+    globalState.get("bricksWorkspace") === vscode.workspace.name &&
+    !workspaceState.get("bricksActivated")
+  ) {
     await globalState.update("bricksGloballyActivated", false);
     await globalState.update("bricksWorkspace", "");
   }
 
-
   const placeholderFilePath = "/WelcomeToBricks.md";
-  const completePlaceholderFileUri = vscode.Uri.parse(storageUri.toString() + placeholderFilePath);
+  const completePlaceholderFileUri = vscode.Uri.parse(
+    storageUri.toString() + placeholderFilePath
+  );
 
   /**
    * Function for creating a placeholder file in storage
    */
   const createPlaceHolderFile = (content: string) => {
-    return treeDataProvider.writeFile(completePlaceholderFileUri, Buffer.from(content), {
-      create: true,
-      overwrite: true,
-    });
+    return treeDataProvider.writeFile(
+      completePlaceholderFileUri,
+      Buffer.from(content),
+      {
+        create: true,
+        overwrite: true,
+      }
+    );
   };
 
   /**
@@ -76,12 +84,16 @@ export async function activate(context: vscode.ExtensionContext) {
     if (!workspaceState.get("bricksActivated")) {
       if (globalState.get("bricksGloballyActivated")) {
         await createPlaceHolderFile(
-          `Please use Shut Down Bricks Command to close Bricks in workspace ${globalState.get("bricksWorkspace")}`
+          `Please use Shut Down Bricks Command to close Bricks in workspace ${globalState.get(
+            "bricksWorkspace"
+          )}`
         );
       } else {
-        await createPlaceHolderFile("Activate Bricks in the command bar to get started");
-      };
-    };
+        await createPlaceHolderFile(
+          "Activate Bricks in the command bar to get started"
+        );
+      }
+    }
   });
 
   /**
@@ -90,21 +102,26 @@ export async function activate(context: vscode.ExtensionContext) {
   if (!workspaceState.get("bricksActivated")) {
     if (globalState.get("bricksGloballyActivated")) {
       await createPlaceHolderFile(
-        `Please use Shut Down Bricks Command to close Bricks in workspace ${globalState.get("bricksWorkspace")}`
+        `Please use Shut Down Bricks Command to close Bricks in workspace ${globalState.get(
+          "bricksWorkspace"
+        )}`
       );
 
       vscode.window.showInformationMessage(
-        `Please use Shut Down Bricks Command to close Bricks in workspace ${globalState.get("bricksWorkspace")}`
+        `Please use Shut Down Bricks Command to close Bricks in workspace ${globalState.get(
+          "bricksWorkspace"
+        )}`
       );
     } else {
-      await createPlaceHolderFile("Activate Bricks in the command bar to get started");
+      await createPlaceHolderFile(
+        "Activate Bricks in the command bar to get started"
+      );
 
       vscode.window.showInformationMessage(
         "Command + Shift + P then type in Activate to start the Bricks VSCode plugin"
       );
-    };
-  };
-
+    }
+  }
 
   treeDataProvider.refresh();
 
@@ -131,9 +148,14 @@ export async function activate(context: vscode.ExtensionContext) {
    * Register the command for activating the plugin
    */
   vscode.commands.registerCommand("bricksDesignToCode.activate", async () => {
-    if (globalState.get("bricksGloballyActivated") && !workspaceState.get("bricksActivated")) {
+    if (
+      globalState.get("bricksGloballyActivated") &&
+      !workspaceState.get("bricksActivated")
+    ) {
       await createPlaceHolderFile(
-        `Please use Shut Down Bricks Command to close Bricks in workspace ${globalState.get("bricksWorkspace")}`
+        `Please use Shut Down Bricks Command to close Bricks in workspace ${globalState.get(
+          "bricksWorkspace"
+        )}`
       );
 
       openTextDocument(completePlaceholderFileUri);
@@ -141,14 +163,14 @@ export async function activate(context: vscode.ExtensionContext) {
     }
 
     if (workspaceState.get("bricksActivated")) {
-      vscode.window.showInformationMessage(
-        "Bricks is already activated"
-      );
+      vscode.window.showInformationMessage("Bricks is already activated");
 
       return;
     }
 
-    await createPlaceHolderFile("Select Components Using the Figma Plugin to get started");
+    await createPlaceHolderFile(
+      "Select Components Using the Figma Plugin to get started"
+    );
     treeDataProvider.refresh();
 
     /**
@@ -192,9 +214,9 @@ export async function activate(context: vscode.ExtensionContext) {
         treeDataProvider.refresh();
 
         // open the main file in the editor
-        const mainFilePath = storageUri.path + files.find((file) =>
-          file.path.includes("GeneratedComponent")
-        )?.path;
+        const mainFilePath =
+          storageUri.path +
+          files.find((file) => file.path.includes("GeneratedComponent"))?.path;
         openTextDocument(vscode.Uri.parse(mainFilePath));
 
         // write entry files for live preview
@@ -209,9 +231,7 @@ export async function activate(context: vscode.ExtensionContext) {
       });
     });
 
-    vscode.window.showInformationMessage(
-      "Bricks has been activated"
-    );
+    vscode.window.showInformationMessage("Bricks has been activated");
   });
 
   /**
@@ -219,9 +239,10 @@ export async function activate(context: vscode.ExtensionContext) {
    */
   vscode.commands.registerCommand("bricksDesignToCode.shutDown", async () => {
     await treeDataProvider.delete(storageUri, { recursive: true });
-    await createPlaceHolderFile("Activate Bricks in the command bar to get started");
+    await createPlaceHolderFile(
+      "Activate Bricks in the command bar to get started"
+    );
     treeDataProvider.refresh();
-
 
     const serverStatus = httpServer.listening;
 
@@ -234,9 +255,7 @@ export async function activate(context: vscode.ExtensionContext) {
       await workspaceState.update("bricksActivated", false);
     }
 
-    vscode.window.showInformationMessage(
-      "Bricks has been shut down"
-    );
+    vscode.window.showInformationMessage("Bricks has been shut down");
   });
 }
 
@@ -244,4 +263,4 @@ export async function deactivate() {
   Preview.dispose();
   io.close();
   httpServer.close();
-};
+}

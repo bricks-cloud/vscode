@@ -6,7 +6,6 @@ let webviewPanel: vscode.WebviewPanel | undefined;
 let currentOpenFilePath: string | undefined;
 const disposables: vscode.Disposable[] = [];
 
-
 export function dispose() {
   webviewPanel?.dispose();
 }
@@ -15,7 +14,6 @@ export async function createOrShow(
   extensionUri: vscode.Uri,
   storageUri: vscode.Uri
 ) {
-
   if (webviewPanel) {
     webviewPanel.webview.postMessage("refresh");
     webviewPanel.reveal(vscode.ViewColumn.Beside);
