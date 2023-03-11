@@ -107,7 +107,17 @@
         "command": "bricksDesignToCode.refreshEntry",
         "title": "Refresh"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Bricks Config",
+      "properties": {
+        "bricksDesignToCode.settings.showStatusBarItem": {
+          "type": "boolean",
+          "default": true,
+          "description": "Change this to false if you don't want the Bricks button to show in the statusbar"
+        }
+      }
+    }
   },
   "displayName": "Bricks Design to Code",
   "icon": "assets/bricks-logo.png",

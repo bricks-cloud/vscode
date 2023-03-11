@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { File, FileExplorer, FileSystemProvider } from "./fileExplorer";
+import * as StatusBarItem from "./statusBarItem";
 import { Server } from "socket.io";
 import * as Preview from "./preview";
 import { writeEntryFile } from "./preview/writeEntryFile";
@@ -148,6 +149,8 @@ export async function activate(context: vscode.ExtensionContext) {
    * Register the command for activating the plugin
    */
   vscode.commands.registerCommand("bricksDesignToCode.activate", async () => {
+    StatusBarItem.showLoading();
+
     if (
       globalState.get("bricksGloballyActivated") &&
       !workspaceState.get("bricksActivated")
@@ -184,6 +187,7 @@ export async function activate(context: vscode.ExtensionContext) {
       await globalState.update("bricksWorkspace", vscode.workspace.name);
 
       console.log(`Started websocket server on port ${port}...`);
+      StatusBarItem.showShutdown();
     });
 
     /**
@@ -238,6 +242,8 @@ export async function activate(context: vscode.ExtensionContext) {
    * Register the command for shutting down the plugin
    */
   vscode.commands.registerCommand("bricksDesignToCode.shutDown", async () => {
+    StatusBarItem.showLoading();
+
     await treeDataProvider.delete(storageUri, { recursive: true });
     await createPlaceHolderFile(
       "Activate Bricks in the command bar to get started"
@@ -256,7 +262,13 @@ export async function activate(context: vscode.ExtensionContext) {
     }
 
     vscode.window.showInformationMessage("Bricks has been shut down");
+    StatusBarItem.showActivate();
   });
+
+  /**
+   * Create a button for activating and shutting down Bricks
+   */
+  StatusBarItem.initialize();
 }
 
 export async function deactivate() {
