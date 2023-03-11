@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { File, FileExplorer, FileSystemProvider } from "./fileExplorer";
+import * as StatusBarItem from "./statusBarItem";
 import { Server } from "socket.io";
 import * as Preview from "./preview";
 import { writeEntryFile } from "./preview/writeEntryFile";
@@ -101,25 +102,18 @@ export async function activate(context: vscode.ExtensionContext) {
    */
   if (!workspaceState.get("bricksActivated")) {
     if (globalState.get("bricksGloballyActivated")) {
-      await createPlaceHolderFile(
-        `Please use Shut Down Bricks Command to close Bricks in workspace ${globalState.get(
-          "bricksWorkspace"
-        )}`
-      );
+      const bricksGloballyActivatedMessage = `Please use Shut Down Bricks Command to close Bricks in workspace ${globalState.get(
+        "bricksWorkspace"
+      )}`;
 
-      vscode.window.showInformationMessage(
-        `Please use Shut Down Bricks Command to close Bricks in workspace ${globalState.get(
-          "bricksWorkspace"
-        )}`
-      );
+      await createPlaceHolderFile(bricksGloballyActivatedMessage);
+      vscode.window.showInformationMessage(bricksGloballyActivatedMessage);
     } else {
-      await createPlaceHolderFile(
-        "Activate Bricks in the command bar to get started"
-      );
+      const welcomeMessage =
+        'To start using Bricks, click "Activate Bricks" in the status bar, or run "Activate Bricks" in the command palette (Command + Shift + P).';
 
-      vscode.window.showInformationMessage(
-        "Command + Shift + P then type in Activate to start the Bricks VSCode plugin"
-      );
+      await createPlaceHolderFile(welcomeMessage);
+      vscode.window.showInformationMessage(welcomeMessage);
     }
   }
 
@@ -148,23 +142,26 @@ export async function activate(context: vscode.ExtensionContext) {
    * Register the command for activating the plugin
    */
   vscode.commands.registerCommand("bricksDesignToCode.activate", async () => {
+    StatusBarItem.showLoading();
+
     if (
       globalState.get("bricksGloballyActivated") &&
       !workspaceState.get("bricksActivated")
     ) {
-      await createPlaceHolderFile(
-        `Please use Shut Down Bricks Command to close Bricks in workspace ${globalState.get(
+      vscode.window.showInformationMessage(
+        `Please shut down Bricks in workspace ${globalState.get(
           "bricksWorkspace"
         )}`
       );
 
-      openTextDocument(completePlaceholderFileUri);
+      StatusBarItem.showActivate();
       return;
     }
 
     if (workspaceState.get("bricksActivated")) {
       vscode.window.showInformationMessage("Bricks is already activated");
 
+      StatusBarItem.showShutdown();
       return;
     }
 
@@ -183,7 +180,26 @@ export async function activate(context: vscode.ExtensionContext) {
       await globalState.update("bricksGloballyActivated", true);
       await globalState.update("bricksWorkspace", vscode.workspace.name);
 
-      console.log(`Started websocket server on port ${port}...`);
+      vscode.window.showInformationMessage(
+        `Bricks has been activated on port ${port}...`
+      );
+      StatusBarItem.showShutdown();
+    });
+
+    httpServer.on("error", function (e: Error) {
+      //@ts-ignore
+      if (e.code === "EADDRINUSE") {
+        vscode.window.showInformationMessage(
+          `Port ${port} is in use, please shut down any process that's using that port.`
+        );
+      } else {
+        vscode.window.showInformationMessage(
+          `There was an unexpected error starting the Bricks WebSocket server. Please see console for logs.`
+        );
+        console.log(e);
+      }
+
+      StatusBarItem.showActivate();
     });
 
     /**
@@ -230,14 +246,14 @@ export async function activate(context: vscode.ExtensionContext) {
         });
       });
     });
-
-    vscode.window.showInformationMessage("Bricks has been activated");
   });
 
   /**
    * Register the command for shutting down the plugin
    */
   vscode.commands.registerCommand("bricksDesignToCode.shutDown", async () => {
+    StatusBarItem.showLoading();
+
     await treeDataProvider.delete(storageUri, { recursive: true });
     await createPlaceHolderFile(
       "Activate Bricks in the command bar to get started"
@@ -256,7 +272,13 @@ export async function activate(context: vscode.ExtensionContext) {
     }
 
     vscode.window.showInformationMessage("Bricks has been shut down");
+    StatusBarItem.showActivate();
   });
+
+  /**
+   * Create a button for activating and shutting down Bricks
+   */
+  StatusBarItem.initialize();
 }
 
 export async function deactivate() {

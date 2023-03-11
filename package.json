@@ -44,6 +44,7 @@
     "@typescript-eslint/parser": "^5.45.0",
     "esbuild": "^0.17.8",
     "eslint": "^8.28.0",
+    "prettier": "2.8.4",
     "typescript": "^4.9.3"
   },
   "engines": {
@@ -107,7 +108,17 @@
         "command": "bricksDesignToCode.refreshEntry",
         "title": "Refresh"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Bricks Config",
+      "properties": {
+        "bricksDesignToCode.settings.showStatusBarItem": {
+          "type": "boolean",
+          "default": true,
+          "description": "Change this to false if you don't want the Bricks button to show in the statusbar"
+        }
+      }
+    }
   },
   "displayName": "Bricks Design to Code",
   "icon": "assets/bricks-logo.png",
