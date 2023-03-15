@@ -21,7 +21,7 @@ const io = new Server(httpServer, {
 const openTextDocument = async (fileUri: vscode.Uri) => {
   const textDocument = await vscode.workspace.openTextDocument(fileUri);
 
-  await vscode.window.showTextDocument(textDocument, vscode.ViewColumn.One);
+  return vscode.window.showTextDocument(textDocument, vscode.ViewColumn.One);
 };
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -233,13 +233,13 @@ export async function activate(context: vscode.ExtensionContext) {
         const mainFilePath =
           storageUri.path +
           files.find((file) => file.path.includes("GeneratedComponent"))?.path;
-        openTextDocument(vscode.Uri.parse(mainFilePath));
+        await openTextDocument(vscode.Uri.parse(mainFilePath));
 
         // write entry files for live preview
         writeEntryFile(extensionUri.path, mainFilePath);
 
         // show a preview of the main file
-        Preview.createOrShow(context.extensionUri, storageUri);
+        await Preview.createOrShow(context.extensionUri, storageUri);
 
         callback({
           status: "ok",
