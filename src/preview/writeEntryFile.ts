@@ -53,12 +53,10 @@ const entryFileTemplate = (
     const [checked, setChecked] = useState(true);
   
     const handleToggle = (e) => {
-      setChecked(!e.target.checked)
-      if (checked) {
-        document.body.style.backgroundColor = "white"
-      } else {
-        document.body.style.backgroundColor = "black"
-      }
+      setChecked(checked => {
+        document.body.style.backgroundColor = checked ? "black" : "white";
+        return !checked;
+      })
     };
   
     return (
