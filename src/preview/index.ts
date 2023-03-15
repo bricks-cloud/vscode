@@ -55,12 +55,6 @@ function setupWebviewPanel(extensionUri: vscode.Uri) {
     vscode.Uri.joinPath(extensionUri, "media", "vscode.css")
   );
 
-  // const stylesTWCUri = webviewPanel.webview.asWebviewUri(
-  //   vscode.Uri.joinPath(extensionUri, "media", "style.css")
-  // );
-
-  // console.log(stylesTWCUri);
-
   webviewPanel.webview.html = `<!DOCTYPE html>
     <html lang="en">
     <head>
@@ -76,6 +70,7 @@ function setupWebviewPanel(extensionUri: vscode.Uri) {
         window.addEventListener('message', event => {
             const message = event.data;
             if(message === "refresh") {
+              // hack to make iframe refresh
               document.getElementById('preview').src += '';
             }
         });
