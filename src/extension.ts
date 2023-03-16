@@ -13,7 +13,7 @@ const message = {
   noWorkspaceOpened:
     "Open a workspace to start using Bricks Design to Code Tool",
   bricksIsActiveInAnotherWorkspace: (workspace: string) =>
-    `Bricks is already active in workspace ${workspace}, or you have something running on port ${port}. Please shut it down first.`,
+    `Bricks is already active in workspace "${workspace}", or you have something running on port ${port}. Please shut it down first.`,
 };
 
 /**
