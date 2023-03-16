@@ -20,9 +20,9 @@ const message = {
  * Setting up the http server
  */
 const port = 32044;
-const server = createServer();
+const websocketServer = createServer();
 
-const io = new Server(server, {
+const io = new Server(websocketServer, {
   maxHttpBufferSize: 1e8,
   cors: {
     origin: "*",
@@ -66,7 +66,7 @@ export async function activate(context: vscode.ExtensionContext) {
       }
     );
   };
-  if (!server.listening) {
+  if (!websocketServer.listening) {
     // delete all existing files
     await treeDataProvider.delete(storageUri, { recursive: true });
 
@@ -79,7 +79,7 @@ export async function activate(context: vscode.ExtensionContext) {
   /**
    * Server set up
    */
-  server.on("error", function (e: Error) {
+  websocketServer.on("error", function (e: Error) {
     //@ts-ignore
     if (e.code === "EADDRINUSE") {
       const currentlyActiveWorkspace = globalState.get("bricksWorkspace");
@@ -123,7 +123,7 @@ export async function activate(context: vscode.ExtensionContext) {
     /**
      * Start the http server
      */
-    server.listen({ port }, async () => {
+    websocketServer.listen({ port }, async () => {
       await globalState.update("bricksWorkspace", vscode.workspace.name);
 
       vscode.window.showInformationMessage(
@@ -190,9 +190,11 @@ export async function activate(context: vscode.ExtensionContext) {
     treeDataProvider.refresh();
 
     Preview.dispose();
-    server.close(() => {
-      io.removeAllListeners();
-    });
+    io.removeAllListeners();
+    io.close();
+    websocketServer.close();
+
+    await context.globalState.update("bricksWorkspace", undefined);
 
     vscode.window.showInformationMessage("Bricks has been shut down.");
     StatusBarItem.showActivate();
@@ -204,11 +206,6 @@ export async function activate(context: vscode.ExtensionContext) {
   StatusBarItem.initialize();
 }
 
-export function deactivate(context: vscode.ExtensionContext) {
-  context.globalState.update("bricksWorkspace", undefined);
-
-  Preview.dispose();
-  server.close(() => {
-    io.removeAllListeners();
-  });
+export async function deactivate(context: vscode.ExtensionContext) {
+  await context.globalState.update("bricksWorkspace", undefined);
 }

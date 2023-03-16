@@ -112,7 +112,7 @@ export function endServer(): Promise<void> {
         return reject(err);
       }
       server = undefined;
-      console.log("Stopped express server!");
+      console.log("Stopped live preview server!");
       return resolve();
     });
   });
