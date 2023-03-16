@@ -1,6 +1,6 @@
 {
   "name": "d2c-vscode",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Bricks is Github copilot for UI engineering. It is built by fullstack engineers for fullstack engineers.",
   "repository": {
     "type": "git",
