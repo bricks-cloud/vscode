@@ -1,6 +1,6 @@
 {
   "name": "vscode",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Bricks is Github copilot for UI engineering. It is built by fullstack engineers for fullstack engineers.",
   "repository": {
     "type": "git",
@@ -10,7 +10,8 @@
   "scripts": {
     "dev:install": "vsce package && code --install-extension vscode-0.0.6.vsix --force",
     "vscode:prepublish": "node esbuild.prod.js",
-    "watch": "node esbuild.dev.js"
+    "watch": "node esbuild.dev.js",
+    "publish": "vsce publish && npm version patch"
   },
   "dependencies": {
     "@types/tcp-port-used": "^1.0.1",
