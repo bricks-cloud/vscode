@@ -80,10 +80,6 @@
         "title": "Open File"
       },
       {
-        "command": "bricksDesignToCode.reset",
-        "title": "Reset Bricks"
-      },
-      {
         "command": "bricksDesignToCode.activate",
         "title": "Activate Bricks"
       },
