@@ -9,7 +9,7 @@ import { createServer } from "http";
 const message = {
   welcome:
     'To start using Bricks, click "Activate Bricks" in the status bar, or run "Activate Bricks" in the command palette ("View" > "Command Palette").',
-  activated: "",
+  activated: "Activated! Go to Figma to select a component.",
   noWorkspaceOpened:
     "Open a workspace to start using Bricks Design to Code Tool",
   bricksIsActiveInAnotherWorkspace: (workspace: string) =>
@@ -126,9 +126,7 @@ export async function activate(context: vscode.ExtensionContext) {
     websocketServer.listen({ port }, async () => {
       await globalState.update("bricksWorkspace", vscode.workspace.name);
 
-      vscode.window.showInformationMessage(
-        "Activated! Go to Figma to select a component."
-      );
+      vscode.window.showInformationMessage(message.activated);
 
       StatusBarItem.showShutdown();
     });
