@@ -13,7 +13,7 @@ const message = {
   noWorkspaceOpened:
     "Open a workspace to start using Bricks Design to Code Tool",
   bricksIsActiveInAnotherWorkspace: (workspace: string) =>
-    `Bricks is already active in workspace: ${workspace}. Please first shut it down.`,
+    `Bricks is already active in workspace ${workspace}, or you have something running on port ${port}. Please shut it down first.`,
 };
 
 /**
@@ -192,7 +192,6 @@ export async function activate(context: vscode.ExtensionContext) {
     Preview.dispose();
     io.removeAllListeners();
     io.close();
-    websocketServer.close();
 
     await context.globalState.update("bricksWorkspace", undefined);
 
@@ -204,8 +203,4 @@ export async function activate(context: vscode.ExtensionContext) {
    * Create a button for activating and shutting down Bricks
    */
   StatusBarItem.initialize();
-}
-
-export async function deactivate(context: vscode.ExtensionContext) {
-  await context.globalState.update("bricksWorkspace", undefined);
 }
