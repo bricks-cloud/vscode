@@ -40,23 +40,23 @@ const entryFileTemplate = (
     if (fs.existsSync(cssFilePath) && format === "html") {
       importCSSFile = true;
     }
-  } catch (err) {}
+  } catch (err) { }
 
   const cssImportStatement = `import "${splitedPath.join("/")}";`;
 
   return `import React, { useState } from "react";
-  import { createRoot } from "react-dom/client";
-  import ${componentName} from "${activeDocumentPath}";
-  ${importCSSFile ? cssImportStatement : ""}
+import { createRoot } from "react-dom/client";
+import ${componentName} from "${activeDocumentPath}";
+${importCSSFile ? cssImportStatement : ""}
   
   const App = () => {
-    const [checked, setChecked] = useState(true);
+    const [checked, setChecked] = useState(false);
   
     const handleToggle = (e) => {
       setChecked(checked => {
         document.body.style.backgroundColor = checked ? "black" : "white";
         return !checked;
-      })
+      });
     };
   
     return (
