@@ -1,6 +1,6 @@
 {
   "name": "d2c-vscode",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Bricks is Github copilot for UI engineering. It is built by fullstack engineers for fullstack engineers.",
   "repository": {
     "type": "git",
@@ -8,7 +8,7 @@
   },
   "main": "./out/extension.js",
   "scripts": {
-    "dev:install": "vsce package && code --install-extension d2c-vscode-0.0.7.vsix --force",
+    "dev:install": "vsce package && code --install-extension d2c-vscode-0.0.9.vsix --force",
     "vscode:prepublish": "node esbuild.prod.js",
     "watch": "node esbuild.dev.js",
     "publish": "vsce publish && npm version patch --force"

@@ -1,4 +1,3 @@
-import * as vscode from "vscode";
 import type http from "http";
 import path from "path";
 import express from "express";
@@ -47,11 +46,12 @@ export async function startServer(
       };
 
       // add plugin for postcss when tailwindcss is selected
-      const tWCFilePath = path.resolve(storageFsPath, "tailwind.config.js");
-      if (fs.existsSync(tWCFilePath)) {
-        let tWCConfig = requireUncached(tWCFilePath);
+      const twcssFilePath = path.resolve(storageFsPath, "tailwind.config.js");
+      const cssFilePath = path.resolve(storageFsPath, "style.css");
+      if (fs.existsSync(twcssFilePath)) {
+        let twcssConfig = requireUncached(twcssFilePath);
 
-        tWCConfig.content = tWCConfig.content.map((originalPath: string) => {
+        twcssConfig.content = twcssConfig.content.map((originalPath: string) => {
           const parts = originalPath.split("/");
           const matchedFileFormat = parts[parts.length - 1];
           return path.resolve(storageFsPath, matchedFileFormat);
@@ -61,20 +61,35 @@ export async function startServer(
           sassPlugin({
             async transform(source: string, resolveDir: string) {
               const { css } = await postcss([
-                tailwindcss(tWCConfig),
+                tailwindcss(twcssConfig),
                 autoprefixer,
                 postcssPresetEnv,
               ]).process(source, { from: undefined });
+
               return css;
             },
             type: "style",
             filter: /.(s[ac]ss|css)$/,
           }),
         ];
-      }
+      } else if (fs.existsSync(cssFilePath)) {
+        esbuildConfig.plugins = [
+          sassPlugin({
+            async transform(source: string, resolveDir: string) {
+              const { css } = await postcss([
+                autoprefixer,
+                postcssPresetEnv,
+              ]).process(source, { from: undefined });
+
+              return css;
+            },
+            type: "style",
+            filter: /.(s[ac]ss|css)$/,
+          }),
+        ];
+      };
 
       const result = await esbuild.build(esbuildConfig);
-
       if (result.errors.length > 0) {
         return res.status(500).send(result.errors);
       }

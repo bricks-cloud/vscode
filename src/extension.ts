@@ -5,6 +5,7 @@ import { Server } from "socket.io";
 import * as Preview from "./preview";
 import { writeEntryFile } from "./preview/writeEntryFile";
 import { createServer } from "http";
+import { formatFiles } from "./util";
 
 const message = {
   welcome:
@@ -86,8 +87,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
       const error = currentlyActiveWorkspace
         ? message.bricksIsActiveInAnotherWorkspace(
-            currentlyActiveWorkspace as string
-          )
+          currentlyActiveWorkspace as string
+        )
         : `Port ${port} is in use, please shut down any process that's using that port.`;
       vscode.window.showErrorMessage(error);
     } else {
@@ -140,7 +141,7 @@ export async function activate(context: vscode.ExtensionContext) {
       socket.on("code-generation", async (data, callback) => {
         await treeDataProvider.delete(storageUri, { recursive: true });
 
-        const files: File[] = data.files;
+        const files: File[] = formatFiles(data.files);
 
         // write generated files to Bricks workspace
         await Promise.all(
