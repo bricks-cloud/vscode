@@ -1,5 +1,6 @@
+import * as vscode from "vscode";
+import { Utils } from "vscode-uri";
 import type http from "http";
-import path from "path";
 import express from "express";
 import * as esbuild from "esbuild-wasm";
 import getPort, { portNumbers } from "get-port";
@@ -19,8 +20,8 @@ function requireUncached(module: string) {
 }
 
 export async function startServer(
-  extensionFsPath: string,
-  storageFsPath: string
+  extensionUri: vscode.Uri,
+  storageUri: vscode.Uri
 ): Promise<void> {
   previewServerPort = await getPort({ port: portNumbers(4000, 5000) });
 
@@ -29,8 +30,10 @@ export async function startServer(
   app.use(async function (req, res, next) {
     if (req.url === "/index.js") {
       let esbuildConfig: esbuild.BuildOptions = {
-        entryPoints: [path.resolve(extensionFsPath, "preview", "index.js")],
-        nodePaths: [path.resolve(extensionFsPath, "node_modules")],
+        entryPoints: [
+          Utils.resolvePath(extensionUri, "./preview", "./index.js").fsPath,
+        ],
+        nodePaths: [Utils.resolvePath(extensionUri, "./node_modules").fsPath],
         bundle: true,
         write: false,
         loader: {
@@ -46,16 +49,21 @@ export async function startServer(
       };
 
       // add plugin for postcss when tailwindcss is selected
-      const twcssFilePath = path.resolve(storageFsPath, "tailwind.config.js");
-      const cssFilePath = path.resolve(storageFsPath, "style.css");
+      const twcssFilePath = Utils.resolvePath(
+        storageUri,
+        "tailwind.config.js"
+      ).fsPath;
+      const cssFilePath = Utils.resolvePath(storageUri, "style.css").fsPath;
       if (fs.existsSync(twcssFilePath)) {
         let twcssConfig = requireUncached(twcssFilePath);
 
-        twcssConfig.content = twcssConfig.content.map((originalPath: string) => {
-          const parts = originalPath.split("/");
-          const matchedFileFormat = parts[parts.length - 1];
-          return path.resolve(storageFsPath, matchedFileFormat);
-        });
+        twcssConfig.content = twcssConfig.content.map(
+          (originalPath: string) => {
+            const parts = originalPath.split("/");
+            const matchedFileFormat = parts[parts.length - 1];
+            return Utils.resolvePath(storageUri, matchedFileFormat).fsPath;
+          }
+        );
 
         esbuildConfig.plugins = [
           sassPlugin({
@@ -87,7 +95,7 @@ export async function startServer(
             filter: /.(s[ac]ss|css)$/,
           }),
         ];
-      };
+      }
 
       const result = await esbuild.build(esbuildConfig);
       if (result.errors.length > 0) {
@@ -104,8 +112,8 @@ export async function startServer(
     next();
   });
 
-  app.use(express.static(path.resolve(extensionFsPath, "preview")));
-  app.use(express.static(storageFsPath));
+  app.use(express.static(Utils.resolvePath(extensionUri, "preview").fsPath));
+  app.use(express.static(storageUri.fsPath));
 
   return new Promise<void>((resolve) => {
     server = app.listen(previewServerPort, () => {

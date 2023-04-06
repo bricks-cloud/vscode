@@ -1,18 +1,20 @@
 import * as vscode from "vscode";
 import fs from "fs";
-import path from "path";
+import { Utils } from "vscode-uri";
 
-export function writeEntryFile(extensionFsPath: string, mainFilePath: string) {
-  const parts = mainFilePath?.split(".");
-  const fileExtension = Array.isArray(parts) ? parts[parts.length - 1] : "";
+export function writeEntryFile(
+  extensionUri: vscode.Uri,
+  mainFileUri: vscode.Uri
+) {
+  const fileExtension = Utils.extname(mainFileUri);
 
   switch (fileExtension) {
-    case "tsx":
-    case "jsx":
-      writeEntryFileForReact(extensionFsPath, mainFilePath);
+    case ".tsx":
+    case ".jsx":
+      writeEntryFileForReact(extensionUri, mainFileUri);
       break;
-    case "html":
-      writeEntryFileForHtml(extensionFsPath, mainFilePath);
+    case ".html":
+      writeEntryFileForHtml(extensionUri, mainFileUri);
       break;
     default:
       vscode.window.showInformationMessage(
@@ -22,31 +24,37 @@ export function writeEntryFile(extensionFsPath: string, mainFilePath: string) {
   }
 }
 
+function getPath(uri: vscode.Uri) {
+  if (process.platform === "win32") {
+    return uri.path.slice(1).replace(/\//g, "\\\\");
+  } else {
+    return uri.path;
+  }
+}
+
 const entryFileTemplate = (
   componentName: string,
-  activeDocumentPath: string,
+  activeDocumentUri: vscode.Uri,
   format: string
 ) => {
-  const htmlComponent = `<div dangerouslySetInnerHTML={{ __html: ${componentName} }}></div>`;
-  const reactComponent = `<${componentName} />`;
-
-  const splitedPath = activeDocumentPath.split("/");
-  splitedPath[splitedPath.length - 1] = "style.css";
-  const cssFilePath = splitedPath.join("/");
+  const cssFileUri = Utils.resolvePath(
+    Utils.dirname(activeDocumentUri),
+    "./style.css"
+  );
 
   let importCSSFile = false;
 
   try {
-    if (fs.existsSync(cssFilePath) && format === "html") {
+    if (fs.existsSync(cssFileUri.fsPath) && format === "html") {
       importCSSFile = true;
     }
-  } catch (err) { }
+  } catch (err) {}
 
-  const cssImportStatement = `import "${splitedPath.join("/")}";`;
+  const cssImportStatement = `import "${getPath(cssFileUri)}";`;
 
   return `import React, { useState } from "react";
 import { createRoot } from "react-dom/client";
-import ${componentName} from "${activeDocumentPath}";
+import ${componentName} from "${getPath(activeDocumentUri)}";
 ${importCSSFile ? cssImportStatement : ""}
   
   const App = () => {
@@ -61,7 +69,11 @@ ${importCSSFile ? cssImportStatement : ""}
   
     return (
       <div>
-        ${format === "html" ? htmlComponent : reactComponent}
+        ${
+          format === "html"
+            ? `<div dangerouslySetInnerHTML={{ __html: ${componentName} }}></div>`
+            : `<${componentName} />`
+        }
         <div className="toggle">
           <input onChange={handleToggle} type="checkbox" id="switch" /><label for="switch">Toggle</label>
         </div>
@@ -76,34 +88,23 @@ ${importCSSFile ? cssImportStatement : ""}
 };
 
 function writeEntryFileForReact(
-  extensionPath: string,
-  activeDocumentPath: string
+  extensionUri: vscode.Uri,
+  activeDocumentUri: vscode.Uri
 ) {
-  if (activeDocumentPath.startsWith("/c:")) {
-    // windows file path
-    activeDocumentPath = activeDocumentPath.slice(1).replace(/\//g, "\\\\");
-  }
-
-  const activeFileName = path.basename(activeDocumentPath);
-  const componentName = activeFileName.split(".")[0];
+  const componentName = Utils.basename(activeDocumentUri).split(".")[0];
 
   fs.writeFileSync(
-    path.resolve(extensionPath, "preview", "index.js"),
-    entryFileTemplate(componentName, activeDocumentPath, "react")
+    Utils.resolvePath(extensionUri, "./preview", "./index.js").fsPath,
+    entryFileTemplate(componentName, activeDocumentUri, "react")
   );
 }
 
 function writeEntryFileForHtml(
-  extensionPath: string,
-  activeDocumentPath: string
+  extensionUri: vscode.Uri,
+  activeDocumentUri: vscode.Uri
 ) {
-  if (activeDocumentPath.startsWith("/c:")) {
-    // windows file path
-    activeDocumentPath = activeDocumentPath.slice(1).replace(/\//g, "\\\\");
-  }
-
   fs.writeFileSync(
-    path.resolve(extensionPath, "preview", "index.js"),
-    entryFileTemplate("htmlstring", activeDocumentPath, "html")
+    Utils.resolvePath(extensionUri, "./preview", "./index.js").fsPath,
+    entryFileTemplate("htmlstring", activeDocumentUri, "html")
   );
 }
