@@ -6,7 +6,11 @@ import { File } from "./fileExplorer";
 
 
 export const getFileExtension = (file: File) => {
-    const parts = file.path.split(".");
+    return getExtensionFromFilePath(file.path);
+};
+
+export const getExtensionFromFilePath = (path: string) => {
+    const parts = path.split(".");
     return parts[parts.length - 1];
 };
 
@@ -47,4 +51,4 @@ export const formatFiles = (files: File[]): File[] => {
     }
 
     return formated;
-}
+};

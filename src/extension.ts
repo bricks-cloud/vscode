@@ -6,7 +6,7 @@ import { Server } from "socket.io";
 import * as Preview from "./preview";
 import { writeEntryFile } from "./preview/writeEntryFile";
 import { createServer } from "http";
-import { formatFiles } from "./util";
+import { formatFiles, getExtensionFromFilePath } from "./util";
 
 const message = {
   welcome:
@@ -88,8 +88,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
       const error = currentlyActiveWorkspace
         ? message.bricksIsActiveInAnotherWorkspace(
-            currentlyActiveWorkspace as string
-          )
+          currentlyActiveWorkspace as string
+        )
         : `Port ${port} is in use, please shut down any process that's using that port.`;
       vscode.window.showErrorMessage(error);
     } else {
@@ -149,7 +149,13 @@ export async function activate(context: vscode.ExtensionContext) {
           files.map(async ({ content, path }) => {
             const uri = vscode.Uri.parse(storageUri.toString() + path);
 
-            Buffer.from(content);
+            if (getExtensionFromFilePath(path) === "png") {
+
+              return treeDataProvider.writeFile(uri, Buffer.from(content, "base64"), {
+                create: true,
+                overwrite: true,
+              });
+            }
 
             return treeDataProvider.writeFile(uri, Buffer.from(content), {
               create: true,

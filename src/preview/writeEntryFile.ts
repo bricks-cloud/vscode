@@ -48,7 +48,7 @@ const entryFileTemplate = (
     if (fs.existsSync(cssFileUri.fsPath) && format === "html") {
       importCSSFile = true;
     }
-  } catch (err) {}
+  } catch (err) { }
 
   const cssImportStatement = `import "${getPath(cssFileUri)}";`;
 
