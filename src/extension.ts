@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { Utils } from "vscode-uri";
 import { File, FileExplorer, FileSystemProvider } from "./fileExplorer";
 import * as StatusBarItem from "./statusBarItem";
 import { Server } from "socket.io";
@@ -166,13 +167,15 @@ export async function activate(context: vscode.ExtensionContext) {
         treeDataProvider.refresh();
 
         // open the main file in the editor
-        const mainFilePath =
-          storageUri.path +
-          files.find((file) => file.path.includes("GeneratedComponent"))?.path;
-        await openTextDocument(vscode.Uri.parse(mainFilePath));
+        const mainFileUri = Utils.joinPath(
+          storageUri,
+          files.find((file) => file.path.includes("GeneratedComponent"))
+            ?.path || ""
+        );
+        await openTextDocument(mainFileUri);
 
         // write entry files for live preview
-        writeEntryFile(extensionUri.path, mainFilePath);
+        writeEntryFile(extensionUri, mainFileUri);
 
         // show a preview of the main file
         await Preview.createOrShow(context.extensionUri, storageUri);

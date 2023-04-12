@@ -22,7 +22,7 @@ export async function createOrShow(
 
   vscode.window.showInformationMessage("Starting preview...");
 
-  await startServer(extensionUri.fsPath, storageUri.fsPath);
+  await startServer(extensionUri, storageUri);
 
   setupWebviewPanel(extensionUri);
 
