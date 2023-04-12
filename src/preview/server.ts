@@ -95,22 +95,7 @@ export async function startServer(
             filter: /.(s[ac]ss|css)$/,
           }),
         ];
-      } else if (fs.existsSync(cssFilePath)) {
-        esbuildConfig.plugins = [
-          sassPlugin({
-            async transform(source: string, resolveDir: string) {
-              const { css } = await postcss([
-                autoprefixer,
-                postcssPresetEnv,
-              ]).process(source, { from: undefined });
-
-              return css;
-            },
-            type: "style",
-            filter: /.(s[ac]ss|css)$/,
-          }),
-        ];
-      };
+      }
 
       const result = await esbuild.build(esbuildConfig);
       if (result.errors.length > 0) {
