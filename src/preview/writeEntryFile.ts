@@ -62,7 +62,7 @@ ${importCSSFile ? cssImportStatement : ""}
   
     const handleToggle = (e) => {
       setChecked(checked => {
-        document.body.style.backgroundColor = checked ? "black" : "white";
+        document.body.style.backgroundColor = checked ? "white" : "black";
         return !checked;
       });
     };
