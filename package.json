@@ -118,7 +118,7 @@
       },
       {
         "command": "bricksDesignToCode.exportAllFiles",
-        "title": "Export All Files",
+        "title": "Export All Files...",
         "icon": {
           "light": "resources/save-light.svg",
           "dark": "resources/save-dark.svg"
@@ -126,7 +126,7 @@
       },
       {
         "command": "bricksDesignToCode.exportFile",
-        "title": "Export File"
+        "title": "Export Selected..."
       }
     ],
     "configuration": {
