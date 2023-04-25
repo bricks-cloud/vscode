@@ -77,6 +77,13 @@
           "group": "navigation",
           "when": "view == bricksWorkspace"
         }
+      ],
+      "view/item/context": [
+        {
+          "command": "bricksDesignToCode.exportFile",
+          "group": "navigation",
+          "when": "view == bricksWorkspace"
+        }
       ]
     },
     "commands": [
@@ -116,6 +123,10 @@
           "light": "resources/save-light.svg",
           "dark": "resources/save-dark.svg"
         }
+      },
+      {
+        "command": "bricksDesignToCode.exportFile",
+        "title": "Export File"
       }
     ],
     "configuration": {

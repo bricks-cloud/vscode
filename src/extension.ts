@@ -45,7 +45,13 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand(
       "bricksDesignToCode.exportAllFiles",
-      exportFiles(storageUri, treeDataProvider)
+      exportFiles(storageUri, treeDataProvider, true)
+    )
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "bricksDesignToCode.exportFile",
+      exportFiles(storageUri, treeDataProvider, false)
     )
   );
 
