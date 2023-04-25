@@ -34,7 +34,7 @@ export class FileExplorer {
   }
 
   private openResource(resource: vscode.Uri): void {
-    vscode.window.showTextDocument(resource);
+    vscode.commands.executeCommand("vscode.open", resource, { preview: false });
   }
 }
 

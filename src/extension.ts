@@ -7,21 +7,12 @@ import * as Preview from "./preview";
 import { writeEntryFile } from "./preview/writeEntryFile";
 import { createServer } from "http";
 import { formatFiles, getExtensionFromFilePath } from "./util";
-
-const message = {
-  welcome:
-    'To start using Bricks, click "Activate Bricks" in the status bar, or run "Activate Bricks" in the command palette ("View" > "Command Palette").',
-  activated: "Activated! Go to Figma to select a component.",
-  noWorkspaceOpened:
-    "Open a workspace to start using Bricks Design to Code Tool",
-  bricksIsActiveInAnotherWorkspace: (workspace: string) =>
-    `Bricks is already active in workspace "${workspace}", or you have something running on port ${port}. Please shut it down first.`,
-};
+import { MESSAGE, PORT } from "./constants";
+import { exportFiles } from "./exportFiles";
 
 /**
  * Setting up the http server
  */
-const port = 32044;
 const websocketServer = createServer();
 
 const io = new Server(websocketServer, {
@@ -41,7 +32,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const { extensionUri, storageUri, globalState } = context;
 
   if (!storageUri) {
-    vscode.window.showInformationMessage(message.noWorkspaceOpened);
+    vscode.window.showInformationMessage(MESSAGE.noWorkspaceOpened);
     return;
   }
 
@@ -50,6 +41,13 @@ export async function activate(context: vscode.ExtensionContext) {
    */
   const treeDataProvider = new FileSystemProvider(storageUri);
   new FileExplorer(context, treeDataProvider);
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "bricksDesignToCode.exportAllFiles",
+      exportFiles(storageUri, treeDataProvider)
+    )
+  );
 
   /**
    * Helper function for creating a placeholder file in storage
@@ -72,8 +70,8 @@ export async function activate(context: vscode.ExtensionContext) {
     // delete all existing files
     await treeDataProvider.delete(storageUri, { recursive: true });
 
-    await createPlaceHolderFile(message.welcome);
-    vscode.window.showInformationMessage(message.welcome);
+    await createPlaceHolderFile(MESSAGE.welcome);
+    vscode.window.showInformationMessage(MESSAGE.welcome);
   }
 
   treeDataProvider.refresh();
@@ -87,10 +85,10 @@ export async function activate(context: vscode.ExtensionContext) {
       const currentlyActiveWorkspace = globalState.get("bricksWorkspace");
 
       const error = currentlyActiveWorkspace
-        ? message.bricksIsActiveInAnotherWorkspace(
+        ? MESSAGE.bricksIsActiveInAnotherWorkspace(
             currentlyActiveWorkspace as string
           )
-        : `Port ${port} is in use, please shut down any process that's using that port.`;
+        : `Port ${PORT} is in use, please shut down any process that's using that port.`;
       vscode.window.showErrorMessage(error);
     } else {
       vscode.window.showErrorMessage(
@@ -125,10 +123,10 @@ export async function activate(context: vscode.ExtensionContext) {
     /**
      * Start the http server
      */
-    websocketServer.listen({ port }, async () => {
+    websocketServer.listen({ port: PORT }, async () => {
       await globalState.update("bricksWorkspace", vscode.workspace.name);
 
-      vscode.window.showInformationMessage(message.activated);
+      vscode.window.showInformationMessage(MESSAGE.activated);
 
       StatusBarItem.showShutdown();
     });
