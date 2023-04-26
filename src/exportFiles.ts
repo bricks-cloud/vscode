@@ -3,6 +3,10 @@ import path from "path";
 import * as vscode from "vscode";
 import { Utils } from "vscode-uri";
 import { FileSystemProvider } from "./fileExplorer";
+import {
+  trackExportFilesFromContextMenu,
+  trackExportFilesFromSaveIcon,
+} from "./amplitude";
 
 export const exportFiles =
   (
@@ -49,5 +53,11 @@ export const exportFiles =
       ).fsPath;
 
       await fs.copy(fileUri.fsPath, destinationPath);
+    }
+
+    if (exportAllFiles) {
+      trackExportFilesFromSaveIcon();
+    } else {
+      trackExportFilesFromContextMenu();
     }
   };

@@ -9,6 +9,7 @@ import { createServer } from "http";
 import { formatFiles, getExtensionFromFilePath } from "./util";
 import { MESSAGE, PORT } from "./constants";
 import { exportFiles } from "./exportFiles";
+import { setUserId } from "./amplitude";
 
 /**
  * Setting up the http server
@@ -142,6 +143,10 @@ export async function activate(context: vscode.ExtensionContext) {
      */
     io.on("connection", (socket) => {
       socket.emit("pong", "pong");
+
+      socket.on("user-id", (userId) => {
+        setUserId(userId);
+      });
 
       socket.on("code-generation", async (data, callback) => {
         try {
