@@ -21,6 +21,7 @@ export class FileExplorer {
     context.subscriptions.push(
       vscode.window.createTreeView("bricksWorkspace", {
         treeDataProvider: this.bricksFileSystem,
+        canSelectMany: true,
       })
     );
 
@@ -34,7 +35,7 @@ export class FileExplorer {
   }
 
   private openResource(resource: vscode.Uri): void {
-    vscode.window.showTextDocument(resource);
+    vscode.commands.executeCommand("vscode.open", resource, { preview: false });
   }
 }
 

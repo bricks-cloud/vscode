@@ -7,6 +7,8 @@
 !preview/index.html
 # Styles in webview panel
 !media/**/*
+# Needed for icons
+!resources/**/*
 # Needed for previewing React code
 !node_modules/esbuild-wasm
 !node_modules/react

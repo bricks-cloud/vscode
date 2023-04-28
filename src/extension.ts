@@ -7,21 +7,13 @@ import * as Preview from "./preview";
 import { writeEntryFile } from "./preview/writeEntryFile";
 import { createServer } from "http";
 import { formatFiles, getExtensionFromFilePath } from "./util";
-
-const message = {
-  welcome:
-    'To start using Bricks, click "Activate Bricks" in the status bar, or run "Activate Bricks" in the command palette ("View" > "Command Palette").',
-  activated: "Activated! Go to Figma to select a component.",
-  noWorkspaceOpened:
-    "Open a workspace to start using Bricks Design to Code Tool",
-  bricksIsActiveInAnotherWorkspace: (workspace: string) =>
-    `Bricks is already active in workspace "${workspace}", or you have something running on port ${port}. Please shut it down first.`,
-};
+import { MESSAGE, PORT } from "./constants";
+import { exportFiles } from "./exportFiles";
+import { setUserId } from "./amplitude";
 
 /**
  * Setting up the http server
  */
-const port = 32044;
 const websocketServer = createServer();
 
 const io = new Server(websocketServer, {
@@ -41,7 +33,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const { extensionUri, storageUri, globalState } = context;
 
   if (!storageUri) {
-    vscode.window.showInformationMessage(message.noWorkspaceOpened);
+    vscode.window.showInformationMessage(MESSAGE.noWorkspaceOpened);
     return;
   }
 
@@ -50,6 +42,19 @@ export async function activate(context: vscode.ExtensionContext) {
    */
   const treeDataProvider = new FileSystemProvider(storageUri);
   new FileExplorer(context, treeDataProvider);
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "bricksDesignToCode.exportAllFiles",
+      exportFiles(storageUri, treeDataProvider, true)
+    )
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "bricksDesignToCode.exportFile",
+      exportFiles(storageUri, treeDataProvider, false)
+    )
+  );
 
   /**
    * Helper function for creating a placeholder file in storage
@@ -72,8 +77,8 @@ export async function activate(context: vscode.ExtensionContext) {
     // delete all existing files
     await treeDataProvider.delete(storageUri, { recursive: true });
 
-    await createPlaceHolderFile(message.welcome);
-    vscode.window.showInformationMessage(message.welcome);
+    await createPlaceHolderFile(MESSAGE.welcome);
+    vscode.window.showInformationMessage(MESSAGE.welcome);
   }
 
   treeDataProvider.refresh();
@@ -87,10 +92,10 @@ export async function activate(context: vscode.ExtensionContext) {
       const currentlyActiveWorkspace = globalState.get("bricksWorkspace");
 
       const error = currentlyActiveWorkspace
-        ? message.bricksIsActiveInAnotherWorkspace(
-          currentlyActiveWorkspace as string
-        )
-        : `Port ${port} is in use, please shut down any process that's using that port.`;
+        ? MESSAGE.bricksIsActiveInAnotherWorkspace(
+            currentlyActiveWorkspace as string
+          )
+        : `Port ${PORT} is in use, please shut down any process that's using that port.`;
       vscode.window.showErrorMessage(error);
     } else {
       vscode.window.showErrorMessage(
@@ -125,10 +130,10 @@ export async function activate(context: vscode.ExtensionContext) {
     /**
      * Start the http server
      */
-    websocketServer.listen({ port }, async () => {
+    websocketServer.listen({ port: PORT }, async () => {
       await globalState.update("bricksWorkspace", vscode.workspace.name);
 
-      vscode.window.showInformationMessage(message.activated);
+      vscode.window.showInformationMessage(MESSAGE.activated);
 
       StatusBarItem.showShutdown();
     });
@@ -139,50 +144,65 @@ export async function activate(context: vscode.ExtensionContext) {
     io.on("connection", (socket) => {
       socket.emit("pong", "pong");
 
+      socket.on("user-id", (userId) => {
+        setUserId(userId);
+      });
+
       socket.on("code-generation", async (data, callback) => {
-        await treeDataProvider.delete(storageUri, { recursive: true });
+        try {
+          await treeDataProvider.delete(storageUri, { recursive: true });
 
-        const files: File[] = formatFiles(data.files);
+          const files: File[] = formatFiles(data.files);
 
-        // write generated files to Bricks workspace
-        await Promise.all(
-          files.map(async ({ content, path }) => {
-            const uri = vscode.Uri.parse(storageUri.toString() + path);
+          // write generated files to Bricks workspace
+          await Promise.all(
+            files.map(async ({ content, path }) => {
+              const uri = vscode.Uri.parse(storageUri.toString() + path);
 
-            if (getExtensionFromFilePath(path) === "png") {
+              if (getExtensionFromFilePath(path) === "png") {
+                return treeDataProvider.writeFile(
+                  uri,
+                  Buffer.from(content, "base64"),
+                  {
+                    create: true,
+                    overwrite: true,
+                  }
+                );
+              }
 
-              return treeDataProvider.writeFile(uri, Buffer.from(content, "base64"), {
+              return treeDataProvider.writeFile(uri, Buffer.from(content), {
                 create: true,
                 overwrite: true,
               });
-            }
+            })
+          );
 
-            return treeDataProvider.writeFile(uri, Buffer.from(content), {
-              create: true,
-              overwrite: true,
-            });
-          })
-        );
+          treeDataProvider.refresh();
 
-        treeDataProvider.refresh();
+          // open the main file in the editor
+          const mainFileUri = Utils.joinPath(
+            storageUri,
+            files.find((file) => file.path.includes("GeneratedComponent"))
+              ?.path || ""
+          );
+          await openTextDocument(mainFileUri);
 
-        // open the main file in the editor
-        const mainFileUri = Utils.joinPath(
-          storageUri,
-          files.find((file) => file.path.includes("GeneratedComponent"))
-            ?.path || ""
-        );
-        await openTextDocument(mainFileUri);
+          // write entry files for live preview
+          writeEntryFile(extensionUri, mainFileUri);
 
-        // write entry files for live preview
-        writeEntryFile(extensionUri, mainFileUri);
+          // show a preview of the main file
+          await Preview.createOrShow(context.extensionUri, storageUri);
 
-        // show a preview of the main file
-        await Preview.createOrShow(context.extensionUri, storageUri);
-
-        callback({
-          status: "ok",
-        });
+          callback({
+            status: "ok",
+          });
+        } catch (e: any) {
+          console.error(e);
+          callback({
+            status: "error",
+            error: e.stack,
+          });
+        }
       });
     });
   });
