@@ -1,16 +1,15 @@
-# Bricks VS Code Extension
+<p align="center">
+<img src="./assets/bricks-logo.png" width="150" />
+</p>
 
-This project contains the VS Code extension for Bricks.
+# **Bricks: Design to Code For Developers**
 
-## Debugging Bricks VS Code Extension
+<p align="center">
+   <a href='http://makeapullrequest.com'><img alt='PRs Welcome' src='https://img.shields.io/badge/PRs-welcome-43AF11.svg?style=shields'/></a>
+   <a href="https://github.com/bricks-cloud/vscode/stargazers"><img src="https://img.shields.io/github/stars/bricks-cloud/vscode?color=e4b442" alt="Github Stars"></a>
+   <a href="https://join.slack.com/t/brickscommunity/shared_invite/zt-1pb2hy3h2-9rDYWMZdHKxHblzUG0CpTQ"><img src="https://img.shields.io/badge/slack-bricks-blue?logo=slack&labelColor=2EB67D" alt="Join Bricks on Slack"></a>
+   <a href="https://github.com/bricks-cloud/vscode/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache-red" alt="License"></a>
+   <a href="https://github.com/bricks-cloud/vscode/commits/main"><img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/m/bricks-cloud/vscode?color=8b55e3"/></a>
+</p>
 
-To open a debug window that runs the extension, hit `F5` in VS Code (or in the toolbar, go to "Run", "Start Debuggin"). When you make a change, you'll have to reload the extension in order to see the change.
-
-## Installing Bricks VS Code Extension Locally
-
-Install a local version of Bricks by running `yarn run dev:install`.
-
-### How to fix common issues
-
-- After installing or updating Bricks, use Developer:Reload Window in the command bar to fix any anomalies.
-- If issues persist, open the command palette (Command + Shift + P) and type "Reset Bricks" to reset all Bricks settings in each window.
+This project is part of [bricks](https://github.com/bricks-cloud/bricks).
