@@ -79,8 +79,8 @@ export async function activate(context: vscode.ExtensionContext) {
     await createPlaceHolderFile(MESSAGE.welcome);
 
     const doNotShowAgain: string = "Do not show again";
-    const welcomeMessageDismissed: boolean | undefined = globalState.get("welcome-message-do-not-show-again");
-    if (!welcomeMessageDismissed) {
+    const welcomeMessageDoNotShowAgain: boolean | undefined = globalState.get("welcome-message-do-not-show-again");
+    if (!welcomeMessageDoNotShowAgain) {
       vscode.window.showInformationMessage(MESSAGE.welcome, ...[doNotShowAgain]).then((item) => {
         if (item === doNotShowAgain) {
           globalState.update("welcome-message-do-not-show-again", true);
