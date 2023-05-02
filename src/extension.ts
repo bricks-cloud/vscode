@@ -76,10 +76,10 @@ export async function activate(context: vscode.ExtensionContext) {
   if (!websocketServer.listening) {
     // delete all existing files
     await treeDataProvider.delete(storageUri, { recursive: true });
-    const welcomeMessageDismissed: boolean | undefined = globalState.get("welcome-message-do-not-show-again");
     await createPlaceHolderFile(MESSAGE.welcome);
 
     const doNotShowAgain: string = "Do not show again";
+    const welcomeMessageDismissed: boolean | undefined = globalState.get("welcome-message-do-not-show-again");
     if (!welcomeMessageDismissed) {
       vscode.window.showInformationMessage(MESSAGE.welcome, ...[doNotShowAgain]).then((item) => {
         if (item === doNotShowAgain) {
