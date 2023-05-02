@@ -3,7 +3,6 @@ import { disposeAll } from "./utils";
 import { startServer, endServer, getServerPort } from "./server";
 
 let webviewPanel: vscode.WebviewPanel | undefined;
-let currentOpenFilePath: string | undefined;
 const disposables: vscode.Disposable[] = [];
 
 export function dispose() {
@@ -25,8 +24,6 @@ export async function createOrShow(
   await startServer(extensionUri, storageUri);
 
   setupWebviewPanel(extensionUri);
-
-  currentOpenFilePath = vscode.window.activeTextEditor?.document.uri.path;
 }
 
 function setupWebviewPanel(extensionUri: vscode.Uri) {
@@ -65,8 +62,23 @@ function setupWebviewPanel(extensionUri: vscode.Uri) {
       <title>React Component Preview</title>
     </head>
     <body>
+    <header>
+      <div>Live Preview running on: http://localhost:${getServerPort()}/</div>
+      <button
+        id="open-preview-in-browser"
+        title="Open preview in browser"
+        class="codicon codicon-add themed-button"
+      >
+        Open in external browser
+      </button>
+    </header>
       <iframe id="preview" src="http://localhost:${getServerPort()}/" sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
       <script>
+        const vscode = acquireVsCodeApi();
+        document.getElementById('open-preview-in-browser').addEventListener('click', () => {
+          vscode.postMessage({ command: 'openPreviewInBrowser' });
+        });
+
         window.addEventListener('message', event => {
             const message = event.data;
             if(message === "refresh") {
@@ -79,7 +91,7 @@ function setupWebviewPanel(extensionUri: vscode.Uri) {
     </html>`;
 
   /**
-   * Reload on save
+   * For sending messages to the webview
    */
   const supportedLanguages = ["typescriptreact", "javascriptreact", "html"];
   vscode.workspace.onDidSaveTextDocument(
@@ -89,6 +101,22 @@ function setupWebviewPanel(extensionUri: vscode.Uri) {
         document.uri.scheme === "file"
       ) {
         webviewPanel!.webview.postMessage("refresh");
+      }
+    },
+    null,
+    disposables
+  );
+
+  /**
+   * For receiving messages from the webview
+   */
+  webviewPanel.webview.onDidReceiveMessage(
+    (message) => {
+      switch (message.command) {
+        case "openPreviewInBrowser":
+          const uri = vscode.Uri.parse(`http://localhost:${getServerPort()}/`);
+          vscode.env.openExternal(uri);
+          break;
       }
     },
     null,
