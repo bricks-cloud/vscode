@@ -77,8 +77,16 @@ export async function activate(context: vscode.ExtensionContext) {
     // delete all existing files
     await treeDataProvider.delete(storageUri, { recursive: true });
 
+    const welcomeMessageDismissed: boolean | undefined = globalState.get("welcome-message-dismissed");
     await createPlaceHolderFile(MESSAGE.welcome);
-    vscode.window.showInformationMessage(MESSAGE.welcome);
+
+    if (!welcomeMessageDismissed) {
+      vscode.window.showInformationMessage(MESSAGE.welcome).then((item) => {
+        if (!item) {
+          globalState.update("welcome-message-dismissed", true);
+        }
+      });
+    }
   }
 
   treeDataProvider.refresh();
@@ -93,8 +101,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
       const error = currentlyActiveWorkspace
         ? MESSAGE.bricksIsActiveInAnotherWorkspace(
-            currentlyActiveWorkspace as string
-          )
+          currentlyActiveWorkspace as string
+        )
         : `Port ${PORT} is in use, please shut down any process that's using that port.`;
       vscode.window.showErrorMessage(error);
     } else {
