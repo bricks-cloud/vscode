@@ -1,8 +1,7 @@
 export const PORT = 32044;
 
 export const MESSAGE = {
-  welcome:
-    'To start using Bricks, click "Activate Bricks" in the status bar, or run "Activate Bricks" in the command palette ("View" > "Command Palette").',
+  welcome: 'To start using Bricks, click "Activate Bricks" in the status bar.',
   activated: "Activated! Go to Figma to select a component.",
   noWorkspaceOpened:
     "Open a workspace to start using Bricks Design to Code Tool",
