@@ -15,9 +15,13 @@ export async function createOrShow(
   storageUri: vscode.Uri
 ) {
   if (webviewPanel) {
-    webviewPanel.webview.postMessage("refresh");
-    webviewPanel.reveal(vscode.ViewColumn.Beside);
-    return;
+    try {
+      webviewPanel.webview.postMessage("refresh");
+      webviewPanel.reveal(vscode.ViewColumn.Beside);
+      return;
+    } catch (e: any) {
+      console.error(e);
+    }
   }
 
   vscode.window.showInformationMessage("Starting preview...");
@@ -101,9 +105,9 @@ function setupWebviewPanel(extensionUri: vscode.Uri) {
   webviewPanel.onDidDispose(
     async () => {
       console.log("Webview is disposed");
+      webviewPanel = undefined;
       await endServer();
       disposeAll(disposables);
-      webviewPanel = undefined;
     },
     null,
     disposables
