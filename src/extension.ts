@@ -10,6 +10,7 @@ import { formatFiles, getExtensionFromFilePath } from "./util";
 import { MESSAGE, PORT } from "./constants";
 import { exportFiles } from "./exportFiles";
 import { setUserId } from "./amplitude";
+import { NodeError } from "./error";
 
 /**
  * Setting up the http server
@@ -205,6 +206,17 @@ export async function activate(context: vscode.ExtensionContext) {
             status: "ok",
           });
         } catch (e: any) {
+          if (e instanceof (NodeError)) {
+            const installNode: string = "Install Node";
+            vscode.window.showErrorMessage(`Encountered ${e}. This might be caused by not having Node.js installed.`, ...[installNode]).then((item) => {
+              if (item === installNode) {
+                vscode.env.openExternal(vscode.Uri.parse('https://nodejs.org/en'));
+              }
+            });
+          } else {
+            vscode.window.showErrorMessage(e);
+          }
+
           console.error(e);
           callback({
             status: "error",

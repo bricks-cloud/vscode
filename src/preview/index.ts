@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { disposeAll } from "./utils";
 import { startServer, endServer, getServerPort } from "./server";
+import { NodeError } from "../error";
 
 let webviewPanel: vscode.WebviewPanel | undefined;
 const disposables: vscode.Disposable[] = [];
@@ -25,9 +26,14 @@ export async function createOrShow(
 
   vscode.window.showInformationMessage("Starting preview...");
 
-  await startServer(extensionUri, storageUri);
+  try {
+    await startServer(extensionUri, storageUri);
+    setupWebviewPanel(extensionUri);
 
-  setupWebviewPanel(extensionUri);
+  } catch (e: any) {
+    console.error(e);
+    throw new NodeError(e);
+  }
 }
 
 function setupWebviewPanel(extensionUri: vscode.Uri) {
